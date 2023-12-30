@@ -1,0 +1,80 @@
+{
+  "nodes": {
+    "flake-programs-sqlite": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "utils": "utils"
+      },
+      "locked": {
+        "lastModified": 1719844387,
+        "narHash": "sha256-UB4wEZJDtO6OaJwbNZsidv6rJ+hQgLD3iNdPCquLuAA=",
+        "owner": "wamserma",
+        "repo": "flake-programs-sqlite",
+        "rev": "0d4accb71785d180b75277c6e4203a49d2b56703",
+        "type": "github"
+      },
+      "original": {
+        "owner": "wamserma",
+        "repo": "flake-programs-sqlite",
+        "type": "github"
+      }
+    },
+    "hidden": {
+      "locked": {
+        "lastModified": 1721758078,
+        "narHash": "sha256-6oJfO5+3/PKTlJEBuLpRM16eb0DMsnE+ph0WLAZE3nY=",
+        "ref": "refs/heads/main",
+        "rev": "c9f5df9e3be469bcf7a5c50eec6e792cedfcece1",
+        "revCount": 7,
+        "type": "git",
+        "url": "file:///home/breda/Documents/nixconfig/hidden"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/breda/Documents/nixconfig/hidden"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1719707984,
+        "narHash": "sha256-RoxIr/fbndtuKqulGvNCcuzC6KdAib85Q8gXnjzA1dw=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "7dca15289a1c2990efbe4680f0923ce14139b042",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-24.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "flake-programs-sqlite": "flake-programs-sqlite",
+        "hidden": "hidden",
+        "nixpkgs": "nixpkgs"
+      }
+    },
+    "utils": {
+      "locked": {
+        "lastModified": 1678901627,
+        "narHash": "sha256-U02riOqrKKzwjsxc/400XnElV+UtPUQWpANPlyazjH0=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "93a2b84fc4b70d9e089d029deacc3583435c2ed6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
