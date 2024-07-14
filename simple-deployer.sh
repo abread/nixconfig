@@ -60,7 +60,7 @@ unset target
 
 rebuild() {
 	op="$1"
-	echo nixos-rebuild "$op" --flake ".#${hostname}" "${targetHost[@]}" "$useRemoteSudo"
+	nixos-rebuild "$op" --flake ".#${hostname}" "${targetHost[@]}" "$useRemoteSudo"
 }
 
 # show result of dry activation
