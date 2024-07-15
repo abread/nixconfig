@@ -12,6 +12,13 @@
   };
   users.defaultUserShell = lib.mkDefault pkgs.bashInteractive;
 
+  # Keep SSH_CONNECTION env variable when using sudo
+  # This allows starship to correctly detect that we are ssh-ed into a remote host
+  # when using sudo -i/sudo -s/etc.
+  security.sudo.extraConfig = ''
+    Defaults:root,%wheel env_keep+=SSH_CONNECTION
+  '';
+
   # Prompt
   programs.starship = {
     enable = true;
