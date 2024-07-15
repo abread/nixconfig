@@ -69,7 +69,7 @@ if [[ "$(hostname)" == "$hostname" ]]; then
 	targetHost=()
 else
 	[[ "$3" == "true" ]] && remoteSudo=(sudo) || remoteSudo=()
-	reboot_cmd=(ssh "$target" "${remoteSudo[@]}" "__simple-deployer-reboot-helper")
+	reboot_cmd=(ssh "$target" "${remoteSudo[@]}" "/run/current-system/sw/bin/__simple-deployer-reboot-helper" "--yes")
 	targetHost=(--target-host "$target")
 fi
 unset target
