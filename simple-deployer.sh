@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
-set -e
+set -o errexit
+set -o errtrace
 
 { command -v dialog && command -v nom && command -v jq && command -v tmux; } >/dev/null || nix-shell -p nix-output-monitor -p jq -p dialog -p tmux --run "$0"
 
 if [[ $# -eq 0 ]]; then
 	# Grab list of hosts, selecting only those with simple-deployer enabled.
-	host_metadata="$(mktemp simple-deployer.XXXXXXXXXX)"
-	trap "rm '${host_metadata}'" EXIT
+	tmpdir="$(mktemp -d -p "${TMPDIR:-/tmp}" simple-deployer.XXXXXXXXXX)"
+	host_metadata="${tmpdir}/simple-deployer.XXXXXXXXXX"
+	trap "rm -rf '${tmpdir}'" EXIT
 	nix eval --json .\#nixosConfigurations --apply 'f: builtins.mapAttrs (h: v: v.config.modules.simple-deployer) f' | jq -c '. | map_values(select(.enable))' > "$host_metadata"
 	
 	# Ask the user which ones should be updated
@@ -26,31 +28,41 @@ if [[ $# -eq 0 ]]; then
 	read -r -p "Press any key to continue..."
 
 	# Open tmux with individual rebuild options for each host
+	unset tmux_sock_path
 	for host_data in $(jq -c 'to_entries | .[]' "$host_metadata"); do
 		hostname="$(echo "$host_data" | jq -r '.key')"
 		targetHost="$(echo "$host_data" | jq -r '.value.targetHost')"
 		useRemoteSudo="$(echo "$host_data" | jq -r '.value.useRemoteSudo')"
 		cmd=("$0" "$hostname" "$targetHost" "$useRemoteSudo")
-		if [[ -n "$tmux_sock_name" ]]; then
-			tmux -L"$tmux_sock_name" new-window "${cmd[@]}"
+		if [[ -n "$tmux_sock_path" ]]; then
+			tmux -S"$tmux_sock_path" new-window "${cmd[@]}"
 		else
-			tmux_sock_name="rebuild.${RANDOM}"
-			tmux -L"$tmux_sock_name" new-session -d "${cmd[@]}"
+			tmux_sock_path="${tmpdir}/tmux"
+			tmux -S"$tmux_sock_path" new-session -d "${cmd[@]}"
 		fi
 
-		tmux -L"$tmux_sock_name" rename-window "$hostname"
+		tmux -S"$tmux_sock_path" rename-window "$hostname"
 	done
 
-	exec tmux -L"$tmux_sock_name" attach
+	tmux -S"$tmux_sock_path" attach
+	exit 0
 fi
+
+pause_on_crash() {
+	echo
+	echo "Looks like we crashed on line $(caller)"
+	read -r -p "Press any key to really exit..."
+	exit 1
+}
+trap pause_on_crash ERR
 
 hostname="$1"
 target="$2"
-[[ "$3" == true ]] && useRemoteSudo="--use-remote-sudo"
+[[ "$3" == "true" ]] && useRemoteSudo=(--use-remote-sudo) || useRemoteSudo=()
 
-reboot_cmd="echo 'I don't know how to reboot this host'"
+reboot_cmd=(echo "I don't know how to reboot this host")
 if [[ "$(hostname)" == "$hostname" ]]; then
-	reboot_cmd="echo 'I refuse to reboot the current host.'"
+	reboot_cmd=(echo "I refuse to reboot the current host.")
 	targetHost=()
 else
 	reboot_cmd=(ssh "$target" reboot)
@@ -60,12 +72,12 @@ unset target
 
 rebuild() {
 	op="$1"
-	nixos-rebuild "$op" --flake ".#${hostname}" "${targetHost[@]}" "$useRemoteSudo"
+	nixos-rebuild "$op" --flake ".#${hostname}" "${targetHost[@]}" "${useRemoteSudo[@]}"
 }
 
 # show result of dry activation
 echo "This is the result of switching to the new configuration in ${hostname}:"
-rebuild dry-activate
+rebuild dry-activate || pause_on_crash
 echo
 read -r -p "Press any key to continue..."
 
@@ -75,7 +87,7 @@ while true; do
 	case "$action" in
 		inspect)
 			echo "This is the result of switching to the new configuration in ${hostname}:"
-			rebuild dry-activate
+			rebuild dry-activate || pause_on_crash
 			echo
 			read -r -p "Press any key to continue..."
 			;;
@@ -99,7 +111,7 @@ while true; do
 			;;
 		switch)
 			echo "${hostname}: Adding new configuration to boot order"
-			rebuild switch
+			rebuild switch || pause_on_crash
 
 			echo
 			read -r -p "Done. Press any key to exit"
@@ -116,5 +128,6 @@ while true; do
 			echo
 			read -r -p "Press any key to exit"
 			exit 1
+			;;
 	esac
 done
