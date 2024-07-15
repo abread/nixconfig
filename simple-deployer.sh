@@ -23,10 +23,11 @@ if [[ $# -eq 0 ]]; then
 	mv "${host_metadata}.new" "$host_metadata"
 
 	readarray -t build_configs < <(jq -r 'keys | map(".#nixosConfigurations." + . + ".config.system.build.toplevel") | .[]' "$host_metadata")
+	echo "Build output:"
 	ionice nice nom build "${build_configs[@]}"
 
 	echo
-	read -r -p "Press any key to continue..."
+	read -r -p "Press enter to continue."
 
 	# Open tmux with individual rebuild options for each host
 	unset tmux_sock_path
@@ -53,7 +54,7 @@ fi
 pause_on_crash() {
 	echo
 	echo "Looks like we crashed on line $(caller)"
-	read -r -p "Press any key to really exit..."
+	read -r -p "Press enter to really exit."
 	exit 1
 }
 trap pause_on_crash ERR
@@ -82,7 +83,7 @@ rebuild() {
 echo "This is the result of switching to the new configuration in ${hostname}:"
 rebuild dry-activate || pause_on_crash
 echo
-read -r -p "Press any key to continue..."
+read -r -p "Press enter to continue..."
 
 while true; do
 	action="$(dialog --stdout --menu "Choose what to do with ${hostname}:" 0 0 0 "inspect" "Inspect the changes caused by the new configuration (again)" "boot" "Add new configuration to top of boot order" "switch" "Switch to the new configuration immediately" "test" "Switch to new configuration without adding it to the boot order" "exit" "Nothing, just exit")"
@@ -93,7 +94,7 @@ while true; do
 			echo "This is the result of switching to the new configuration in ${hostname}:"
 			rebuild dry-activate || pause_on_crash
 			echo
-			read -r -p "Press any key to continue..."
+			read -r -p "Press enter to continue..."
 			;;
 		boot)
 			echo "${hostname}: Adding new configuration to boot order"
@@ -101,18 +102,24 @@ while true; do
 
 			if [[ "$(hostname)" != "$hostname" ]]; then
 				echo
-				read -r -p "Press any key to continue..."
+				read -r -p "Press enter to continue..."
 				if dialog --yesno "Do you want to reboot ${hostname}?" 0 0; then
 					clear
 					echo "Rebooting ${hostname}..."
-					"${reboot_cmd[@]}"
+					"${reboot_cmd[@]}" || {
+						echo
+						echo "Looks like we failed to reboot. If it's the first run this is normal: we need to install the reboot helper first."
+						echo
+						read -r -p "Press enter to exit..."
+						exit 1
+					}
 				fi
 			else
 				echo "Don't forget to reboot!"
 			fi
 
 			echo
-			read -r -p "Done. Press any key to exit"
+			read -r -p "Done. Press enter to exit..."
 			exit 0
 			;;
 		switch)
@@ -120,7 +127,7 @@ while true; do
 			rebuild switch || pause_on_crash
 
 			echo
-			read -r -p "Done. Press any key to exit"
+			read -r -p "Done. Press enter to exit..."
 			exit 0
 			;;
 		test)
@@ -128,7 +135,7 @@ while true; do
 			rebuild test || pause_on_crash
 
 			echo
-			read -r -p "Done. Press any key to exit"
+			read -r -p "Done. Press enter to exit..."
 			exit 0
 			;;
 		exit)
@@ -141,7 +148,7 @@ while true; do
 			echo
 			echo "Unknown command. Aborting"
 			echo
-			read -r -p "Press any key to exit"
+			read -r -p "Press enter to exit"
 			exit 1
 			;;
 	esac
