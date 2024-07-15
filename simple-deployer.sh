@@ -67,7 +67,8 @@ if [[ "$(hostname)" == "$hostname" ]]; then
 	reboot_cmd=(echo "I refuse to reboot the current host.")
 	targetHost=()
 else
-	reboot_cmd=(ssh "$target" reboot)
+	[[ "$3" == "true" ]] && remoteSudo=(sudo) || remoteSudo=()
+	reboot_cmd=(ssh "$target" "${remoteSudo[@]}" "__simple-deployer-reboot-helper")
 	targetHost=(--target-host "$target")
 fi
 unset target
