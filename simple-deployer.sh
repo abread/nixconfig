@@ -14,6 +14,7 @@ if [[ $# -eq 0 ]]; then
 	# Ask the user which ones should be updated
 	readarray -t checklist_entries < <(jq -r 'to_entries | map(.key + "\n" + .value.targetHost + "\n" + if .value.defaultSelect then "on" else "off" end) | .[]' "$host_metadata")
 	chosen_hosts="$(dialog --stdout --checklist 'Select hosts to (re-)build:' 0 0 0 "${checklist_entries[@]}")"
+	clear
 	[[ -z "$chosen_hosts" ]] && echo "No hosts chosen, nothing to do." && exit 0
 	
 	# Filter host metadata based on user choices
@@ -85,6 +86,7 @@ read -r -p "Press any key to continue..."
 while true; do
 	action="$(dialog --stdout --menu "Choose what to do with ${hostname}:" 0 0 0 "inspect" "Inspect the changes caused by the new configuration (again)" "boot" "Add new configuration to top of boot order" "switch" "Switch to the new configuration immediately" "test" "Switch to new configuration without adding it to the boot order" "exit" "Nothing, just exit")"
 
+	clear
 	case "$action" in
 		inspect)
 			echo "This is the result of switching to the new configuration in ${hostname}:"
@@ -100,6 +102,8 @@ while true; do
 				echo
 				read -r -p "Press any key to continue..."
 				if dialog --yesno "Do you want to reboot ${hostname}?" 0 0; then
+					clear
+					echo "Rebooting ${hostname}..."
 					"${reboot_cmd[@]}"
 				fi
 			else
@@ -128,6 +132,7 @@ while true; do
 			;;
 		exit)
 			if dialog --yesno "Are you sure you want to exit?" 0 0; then
+				clear
 				exit 0
 			fi
 			;;
