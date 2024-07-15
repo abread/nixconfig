@@ -4,7 +4,10 @@
   config,
   profiles,
   ...
-}: {
+}: let
+  adminUserName = "admin";
+  deployUserName = "deploy";
+in {
   imports = [
     profiles.core
   ];
@@ -22,13 +25,20 @@
     authorizedKeysFiles = lib.mkForce ["/etc/ssh/authorized_keys.d/%u"];
   };
 
-  users = {
-    # Configure deploy user
-    users.admin = {
+  users.users = {
+    # Configure admin user
+    "${adminUserName}" = {
       isNormalUser = true;
       extraGroups = ["wheel"];
       hashedPassword = config.users.users.root.hashedPassword;
-      openssh.authorizedKeys.keys = inputs.hidden.headlessAuthorizedKeys;
+      openssh.authorizedKeys.keys = inputs.hidden.headlessAdminAuthorizedKeys;
+    };
+
+    # Configure deploy user
+    "${deployUserName}" = {
+      isNormalUser = true;
+      hashedPassword = "!"; # no password login allowed
+      openssh.authorizedKeys.keys = inputs.hidden.headlessDeployAuthorizedKeys;
     };
   };
 

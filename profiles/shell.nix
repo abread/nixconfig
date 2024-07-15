@@ -34,6 +34,7 @@
         time_range = "23:00:00-08:30:00";
       };
       gcloud.disabled = true;
+      hostname.style = "bold green"; # ensure hostname is *very* visible (default is bold dimmed green)
       nix_shell.disabled = true;
     };
   };
