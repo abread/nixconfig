@@ -82,7 +82,7 @@ echo
 read -r -p "Press any key to continue..."
 
 while true; do
-	action="$(dialog --stdout --menu "Choose what to do with ${hostname}:" 0 0 0 "inspect" "Inspect the changes caused by the new configuration (again)" "boot" "Add new configuration to top of boot order" "switch" "Switch to the new configuration immediately" "exit" "Nothing, just exit")"
+	action="$(dialog --stdout --menu "Choose what to do with ${hostname}:" 0 0 0 "inspect" "Inspect the changes caused by the new configuration (again)" "boot" "Add new configuration to top of boot order" "switch" "Switch to the new configuration immediately" "test" "Switch to new configuration without adding it to the boot order" "exit" "Nothing, just exit")"
 
 	case "$action" in
 		inspect)
@@ -110,8 +110,16 @@ while true; do
 			exit 0
 			;;
 		switch)
-			echo "${hostname}: Adding new configuration to boot order"
+			echo "${hostname}: Switching to new configuration"
 			rebuild switch || pause_on_crash
+
+			echo
+			read -r -p "Done. Press any key to exit"
+			exit 0
+			;;
+		test)
+			echo "${hostname}: Switching to new configuration without adding it to boot order"
+			rebuild test || pause_on_crash
 
 			echo
 			read -r -p "Done. Press any key to exit"
