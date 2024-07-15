@@ -45,6 +45,7 @@ if [[ $# -eq 0 ]]; then
 	done
 
 	tmux -S"$tmux_sock_path" attach
+	unlink result
 	exit 0
 fi
 
