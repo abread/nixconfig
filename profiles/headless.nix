@@ -32,8 +32,15 @@
     };
   };
 
+  # Allow deploy user to deploy
+  modules.simple-deployer.deploymentUser = deployUserName;
+
+  # Ensure VPN is running and that firewall holes are pre-punched
   services.tailscale = {
     enable = true;
     openFirewall = true;
   };
+
+  # Ensure starship shows the hostname at all times
+  programs.starship.settings.hostname.ssh_only = lib.mkIf config.programs.starship.enable false;
 }
