@@ -2,7 +2,7 @@
 set -o errexit
 set -o errtrace
 
-{ command -v dialog && command -v nom && command -v jq && command -v tmux; } >/dev/null || nix-shell -p nix-output-monitor -p jq -p dialog -p tmux --run "$0"
+{ command -v dialog && command -v nom && command -v jq && command -v tmux && command -v tput; } >/dev/null || nix-shell -p nix-output-monitor -p jq -p dialog -p tmux -p ncurses --run "$0"
 
 if [[ $# -eq 0 ]]; then
 	# Grab list of hosts, selecting only those with simple-deployer enabled.
@@ -22,20 +22,25 @@ if [[ $# -eq 0 ]]; then
 	jq -c "with_entries(select(.key | in(${chosen_hosts_filter})))" "$host_metadata" > "${host_metadata}.new"
 	mv "${host_metadata}.new" "$host_metadata"
 
-	readarray -t build_configs < <(jq -r 'keys | map(".#nixosConfigurations." + . + ".config.system.build.toplevel") | .[]' "$host_metadata")
+	readarray -t build_configs < <(jq -r 'keys | sort | map(".#nixosConfigurations." + . + ".config.system.build.toplevel") | .[]' "$host_metadata")
 	echo "Build output:"
 	ionice nice nom build "${build_configs[@]}"
+	mv result result-0 # for uniformity
 
 	echo
 	read -r -p "Press enter to continue."
 
 	# Open tmux with individual rebuild options for each host
 	unset tmux_sock_path
-	for host_data in $(jq -c 'to_entries | .[]' "$host_metadata"); do
+	i=0
+	for host_data in $(jq -c 'to_entries | sort_by(.key) | .[]' "$host_metadata"); do
 		hostname="$(echo "$host_data" | jq -r '.key')"
 		targetHost="$(echo "$host_data" | jq -r '.value.targetHost')"
 		useRemoteSudo="$(echo "$host_data" | jq -r '.value.useRemoteSudo')"
-		cmd=("$0" "$hostname" "$targetHost" "$useRemoteSudo")
+		buildResultPath="$(pwd)/result-${i}"
+		i=$(( i + 1 ))
+
+		cmd=("$0" "$hostname" "$targetHost" "$useRemoteSudo" "$buildResultPath")
 		if [[ -n "$tmux_sock_path" ]]; then
 			tmux -S"$tmux_sock_path" new-window "${cmd[@]}"
 		else
@@ -47,7 +52,6 @@ if [[ $# -eq 0 ]]; then
 	done
 
 	tmux -S"$tmux_sock_path" attach
-	unlink result
 	exit 0
 fi
 
@@ -62,15 +66,19 @@ trap pause_on_crash ERR
 hostname="$1"
 target="$2"
 [[ "$3" == "true" ]] && useRemoteSudo=(--use-remote-sudo) || useRemoteSudo=()
+buildResultPath="$4"
+trap 'unlink "${buildResultPath}"' EXIT
 
 reboot_cmd=(echo "I don't know how to reboot this host")
 if [[ "$(hostname)" == "$hostname" ]]; then
 	reboot_cmd=(echo "I refuse to reboot the current host.")
 	targetHost=()
+	targetCmdWrapper=(sh -c)
 else
 	[[ "$3" == "true" ]] && remoteSudo=(sudo) || remoteSudo=()
 	reboot_cmd=(ssh "$target" "${remoteSudo[@]}" "/run/current-system/sw/bin/__simple-deployer-reboot-helper" "--yes")
 	targetHost=(--target-host "$target")
+	targetCmdWrapper=(ssh "$target")
 fi
 unset target
 
@@ -78,17 +86,83 @@ rebuild() {
 	op="$1"
 	nixos-rebuild "$op" --flake ".#${hostname}" "${targetHost[@]}" "${useRemoteSudo[@]}"
 }
+ask_reboot() {
+	msg="$1"
+	if dialog --yesno "$msg" 0 0; then
+		clear
+		echo "Asking ${hostname} to reboot..."
+		"${reboot_cmd[@]}" || {
+			echo
+			echo "Looks like we failed to reboot. If it's the first run this is normal: we need to install the reboot helper first."
+			echo
+			read -r -p "Press enter to exit..."
+			exit 1
+		}
+	else
+		clear
+		echo "Not rebooting ${hostname}"
+	fi
+}
 
-# show result of dry activation
-echo "This is the result of switching to the new configuration in ${hostname}:"
-rebuild dry-activate || pause_on_crash
+# TODO: share ssh connection for all these fetches?
+currentHash="$(nix hash path "$(readlink -f "$buildResultPath")")"
+activeHash="$("${targetCmdWrapper[@]}" 'nix hash path $(readlink -f /run/current-system)')"
+nextBootHash="$("${targetCmdWrapper[@]}" 'nix hash path $(readlink -f /nix/var/nix/profiles/system)')"
+
+menuOptions=()
+[[ "$currentHash" != "$activeHash" ]] && menuOptions+=(
+	"inspect" "Inspect the changes caused by the new configuration (again)"
+)
+[[ "$currentHash" != "$nextBootHash" ]] && menuOptions+=(
+	"boot" "Add new configuration to top of boot order"
+)
+[[ "$currentHash" != "$activeHash" ]] && [[ "$currentHash" == "$nextBootHash" ]] && menuOptions+=(
+	"reboot" "Reboot to new configuration"
+)
+[[ "$currentHash" != "$activeHash" ]] && menuOptions+=(
+	"switch" "Activate new configuration, ensuring it is at the top of the boot order"
+)
+[[ "$currentHash" != "$activeHash" ]] && [[ "$currentHash" != "$nextBootHash" ]] && menuOptions+=(
+	"test" "Activate new configuration without adding it to the boot order"
+)
+
+# exit early if there's nothing to do
+if [[ "${#menuOptions[@]}" == 0 ]]; then
+	bootedHash="$("${targetCmdWrapper[@]}" 'nix hash path $(readlink -f /run/booted-system)')"
+	if [[ "$currentHash" != "$bootedHash" ]]; then
+		if [[ "$hostname" == "$(hostname)" ]]; then
+			echo "$(tput setaf 1 bold)${hostname} has the latest config active but it booted the older one. Maybe you want to reboot it$(tput sgr0)"
+			echo "That said, I refuse to reboot the local host for you"
+			echo
+			read -r -p "Press any key to exit..."
+		else
+			ask_reboot "${hostname} has the latest config active, but it booted an older one. Do you want to reboot it?"
+			echo
+			read -r -p "Press any key to exit..."
+		fi
+	fi
+
+	exit 0
+fi
+
+menuOptions+=( "exit" "Nothing, just exit" )
+
+# show result of dry activation (if there is a difference)
+[[ "$currentHash" != "$activeHash" ]] && {
+	echo "This is the result of switching to the new configuration in ${hostname}:"
+	rebuild dry-activate || pause_on_crash
+}
+
+echo
+[[ "$currentHash" == "$activeHash" ]] && echo "$(tput setaf 1 bold)This configuration is already active .$(tput sgr0)"
+[[ "$currentHash" == "$nextBootHash" ]] && echo "$(tput setaf 1 bold)This configuration is already in the target host and will be activated on next boot.$(tput sgr0)"
 echo
 read -r -p "Press enter to continue..."
 
 while true; do
-	action="$(dialog --stdout --menu "Choose what to do with ${hostname}:" 0 0 0 "inspect" "Inspect the changes caused by the new configuration (again)" "boot" "Add new configuration to top of boot order" "switch" "Switch to the new configuration immediately" "test" "Switch to new configuration without adding it to the boot order" "exit" "Nothing, just exit")"
-
+	action="$(dialog --stdout --menu "Choose what to do with ${hostname}:" 0 0 0 "${menuOptions[@]}")"
 	clear
+
 	case "$action" in
 		inspect)
 			echo "This is the result of switching to the new configuration in ${hostname}:"
@@ -100,27 +174,31 @@ while true; do
 			echo "${hostname}: Adding new configuration to boot order"
 			rebuild boot
 
-			if [[ "$(hostname)" != "$hostname" ]]; then
+			if [[ "$(hostname)" == "$hostname" ]]; then
+				echo "Don't forget to reboot! I refuse to reboot the local host for you."
+			else
 				echo
 				read -r -p "Press enter to continue..."
-				if dialog --yesno "Do you want to reboot ${hostname}?" 0 0; then
-					clear
-					echo "Rebooting ${hostname}..."
-					"${reboot_cmd[@]}" || {
-						echo
-						echo "Looks like we failed to reboot. If it's the first run this is normal: we need to install the reboot helper first."
-						echo
-						read -r -p "Press enter to exit..."
-						exit 1
-					}
-				fi
-			else
-				echo "Don't forget to reboot!"
+				ask_reboot "Do you want to reboot ${hostname}?"
 			fi
 
 			echo
 			read -r -p "Done. Press enter to exit..."
 			exit 0
+			;;
+		reboot)
+			if [[ "$(hostname)" == "$hostname" ]]; then
+				echo "I refuse to reboot the local host!"
+				echo
+				read -r -p "Press enter to exit..."
+				exit 1
+			else
+				echo
+				ask_reboot "Are you sure you want to reboot ${hostname}?"
+				echo
+				read -r -p "Done. Press enter to exit..."
+				exit 0
+			fi
 			;;
 		switch)
 			echo "${hostname}: Switching to new configuration"
@@ -136,6 +214,7 @@ while true; do
 
 			echo
 			read -r -p "Done. Press enter to continue..."
+			# TODO: remove test from menu options
 			;;
 		exit)
 			if dialog --yesno "Are you sure you want to exit?" 0 0; then
