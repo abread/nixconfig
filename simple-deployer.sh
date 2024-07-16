@@ -253,5 +253,10 @@ while true; do
 	echo
 	buildMenuOptions # refresh options
 	echo
-	read -r -p "Press enter to continue..."
+	if [[ ${#menuOptions[@]} == 0 ]]; then
+		read -r -p "All done. Press enter to exit..."
+		exit 0
+	else
+		read -r -p "Press enter to continue..."
+	fi
 done
