@@ -135,8 +135,7 @@ while true; do
 			rebuild test || pause_on_crash
 
 			echo
-			read -r -p "Done. Press enter to exit..."
-			exit 0
+			read -r -p "Done. Press enter to continue..."
 			;;
 		exit)
 			if dialog --yesno "Are you sure you want to exit?" 0 0; then
