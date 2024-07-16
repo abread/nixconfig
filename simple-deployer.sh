@@ -5,11 +5,17 @@ set -o errtrace
 { command -v dialog && command -v nom && command -v jq && command -v tmux && command -v tput; } >/dev/null || nix-shell -p nix-output-monitor -p jq -p dialog -p tmux -p ncurses --run "$0"
 
 if [[ $# -eq 0 ]]; then
-	# Grab list of hosts, selecting only those with simple-deployer enabled.
+	# Switch to temporary directory
+	flakedir="$(pwd)"
+	ownscript="$(realpath "$0")"
 	tmpdir="$(mktemp -d -p "${TMPDIR:-/tmp}" simple-deployer.XXXXXXXXXX)"
-	host_metadata="${tmpdir}/simple-deployer.XXXXXXXXXX"
+	tmpdir="$(realpath "$tmpdir")"
+	cd "$tmpdir"
+
+	# Grab list of hosts, selecting only those with simple-deployer enabled.
+	host_metadata="${tmpdir}/metadata.json"
 	trap "rm -rf '${tmpdir}'" EXIT
-	nix eval --json .\#nixosConfigurations --apply 'f: builtins.mapAttrs (h: v: v.config.modules.simple-deployer) f' | jq -c '. | map_values(select(.enable))' > "$host_metadata"
+	nix eval --json "${flakedir}#nixosConfigurations" --apply 'f: builtins.mapAttrs (h: v: v.config.modules.simple-deployer) f' | jq -c '. | map_values(select(.enable))' > "$host_metadata"
 
 	# Ask the user which ones should be updated
 	readarray -t checklist_entries < <(jq -r 'to_entries | map(.key + "\n" + .value.targetHost + "\n" + if .value.defaultSelect then "on" else "off" end) | .[]' "$host_metadata")
@@ -22,7 +28,7 @@ if [[ $# -eq 0 ]]; then
 	jq -c "with_entries(select(.key | in(${chosen_hosts_filter})))" "$host_metadata" > "${host_metadata}.new"
 	mv "${host_metadata}.new" "$host_metadata"
 
-	readarray -t build_configs < <(jq -r 'keys | sort | map(".#nixosConfigurations." + . + ".config.system.build.toplevel") | .[]' "$host_metadata")
+	readarray -t build_configs < <(jq -r "keys | sort | map(\"$(echo -n -E "$flakedir" | sed 's \\ \\\\ g' | sed 's " \\" g' | sed 's # \\# g')#nixosConfigurations.\" + . + \".config.system.build.toplevel\") | .[]" "$host_metadata")
 	echo "Build output:"
 	ionice nice nom build "${build_configs[@]}"
 	mv result result-0 # for uniformity
@@ -40,7 +46,7 @@ if [[ $# -eq 0 ]]; then
 		buildResultPath="$(pwd)/result-${i}"
 		i=$(( i + 1 ))
 
-		cmd=("$0" "$hostname" "$targetHost" "$useRemoteSudo" "$buildResultPath")
+		cmd=("$ownscript" "$hostname" "$targetHost" "$useRemoteSudo" "$flakedir" "$buildResultPath")
 		if [[ -n "$tmux_sock_path" ]]; then
 			tmux -S"$tmux_sock_path" new-window "${cmd[@]}"
 		else
@@ -66,25 +72,29 @@ trap pause_on_crash ERR
 hostname="$1"
 target="$2"
 [[ "$3" == "true" ]] && useRemoteSudo=(--use-remote-sudo) || useRemoteSudo=()
-buildResultPath="$4"
-trap 'unlink "${buildResultPath}"' EXIT
+flakedir="$(echo -n -E "$4" | sed 's # \\# g')"
+buildResultPath="$5"
 
 reboot_cmd=(echo "I don't know how to reboot this host")
 if [[ "$(hostname)" == "$hostname" ]]; then
+	targetCmdWrapper=(sh -c)
 	reboot_cmd=(echo "I refuse to reboot the current host.")
 	targetHost=()
-	targetCmdWrapper=(sh -c)
 else
+	sshopts=(-o ControlPath="$(pwd)/${hostname}.ssh" -o ControlMaster=auto -o ControlPersist=120)
+	export NIX_SSHOPTS="${sshopts[*]}"
+	targetCmdWrapper=(ssh "${sshopts[@]}" "$target")
+
 	[[ "$3" == "true" ]] && remoteSudo=(sudo) || remoteSudo=()
-	reboot_cmd=(ssh "$target" "${remoteSudo[@]}" "/run/current-system/sw/bin/__simple-deployer-reboot-helper" "--yes")
+	reboot_cmd=("${targetCmdWrapper[@]}" "${remoteSudo[@]}" "/run/current-system/sw/bin/__simple-deployer-reboot-helper" "--yes")
+
 	targetHost=(--target-host "$target")
-	targetCmdWrapper=(ssh "$target")
 fi
 unset target
 
 rebuild() {
 	op="$1"
-	nixos-rebuild "$op" --flake ".#${hostname}" "${targetHost[@]}" "${useRemoteSudo[@]}"
+	nixos-rebuild "$op" --flake "${flakedir}#${hostname}" "${targetHost[@]}" "${useRemoteSudo[@]}"
 }
 ask_reboot() {
 	msg="$1"
@@ -105,7 +115,6 @@ ask_reboot() {
 	fi
 }
 
-# TODO: share ssh connection for all these fetches?
 currentHash="$(nix hash path "$(readlink -f "$buildResultPath")")"
 activeHash="$("${targetCmdWrapper[@]}" 'nix hash path "$(readlink -f /run/current-system)"')"
 nextBootHash="$("${targetCmdWrapper[@]}" 'nix hash path "$(readlink -f /nix/var/nix/profiles/system)"')"
@@ -115,21 +124,31 @@ menuOptions=()
 buildMenuOptions() {
 	menuOptions=()
 
-	[[ "$currentHash" != "$activeHash" ]] && menuOptions+=(
-		"inspect" "Inspect the changes caused by the new configuration (again)"
-	)
-	[[ "$currentHash" != "$nextBootHash" ]] && menuOptions+=(
-		"boot" "Add new configuration to top of boot order"
-	)
-	[[ "$currentHash" != "$activeHash" ]] && [[ "$currentHash" == "$nextBootHash" ]] && menuOptions+=(
-		"reboot" "Reboot to new configuration"
-	)
-	[[ "$currentHash" != "$activeHash" ]] && menuOptions+=(
-		"switch" "Activate new configuration, ensuring it is at the top of the boot order"
-	)
-	[[ "$currentHash" != "$activeHash" ]] && [[ "$currentHash" != "$nextBootHash" ]] && menuOptions+=(
-		"test" "Activate new configuration without adding it to the boot order"
-	)
+	if [[ "$currentHash" != "$activeHash" ]]; then
+		menuOptions+=(
+			"inspect" "Inspect the changes caused by the new configuration (again)"
+		)
+	fi
+	if [[ "$currentHash" != "$nextBootHash" ]]; then
+		menuOptions+=(
+			"boot" "Add new configuration to top of boot order"
+		)
+	fi
+	if [[ "$currentHash" != "$activeHash" ]] && [[ "$currentHash" == "$nextBootHash" ]]; then
+		menuOptions+=(
+			"reboot" "Reboot to new configuration"
+		)
+	fi
+	if [[ "$currentHash" != "$activeHash" ]]; then
+		menuOptions+=(
+			"switch" "Activate new configuration, ensuring it is at the top of the boot order"
+		)
+	fi
+	if [[ "$currentHash" != "$activeHash" ]] && [[ "$currentHash" != "$nextBootHash" ]]; then
+		menuOptions+=(
+			"test" "Activate new configuration without adding it to the boot order"
+		)
+	fi
 }
 
 buildMenuOptions
@@ -165,7 +184,7 @@ echo
 read -r -p "Press enter to continue..."
 
 while true; do
-	action="$(dialog --stdout --menu "Choose what to do with ${hostname}:" 0 0 0 "${menuOptions[@]}" "exit" "Do nothing, just exit")"
+	action="$(dialog --stdout --no-cancel --menu "Choose what to do with ${hostname}:" 0 0 0 "${menuOptions[@]}" "exit" "Do nothing, just exit")"
 	clear
 
 	case "$action" in
