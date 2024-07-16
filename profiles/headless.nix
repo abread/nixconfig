@@ -43,7 +43,7 @@ in {
   };
 
   # Allow deploy user to deploy
-  modules.simple-deployer.deploymentUser = deployUserName;
+  modules.herdnix.deploymentUser = deployUserName;
 
   # Ensure VPN is running and that firewall holes are pre-punched
   services.tailscale = {

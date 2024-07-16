@@ -111,7 +111,8 @@
       inherit system pkgs lib;
       specialArgs = {inherit profiles inputs nixosConfigurations;};
       modules =
-        (lib.collect builtins.isPath (lib.rnl.rakeLeaves ../modules))
+        #(lib.collect builtins.isPath (lib.rnl.rakeLeaves ../modules))
+        []
         ++ [
           {networking.hostName = hostname;}
           hostPath
