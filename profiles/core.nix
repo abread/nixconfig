@@ -15,7 +15,11 @@
     gc = {
       automatic = true;
       randomizedDelaySec = "30min";
-      dates = "03:15";
+      dates = "04:15";
+    };
+    optimise = {
+      automatic = true;
+      dates = ["05:15"];
     };
 
     settings = {
