@@ -30,7 +30,11 @@
     };
   };
 
-  outputs = {self, nixpkgs, ...} @ inputs: let
+  outputs = {
+    self,
+    nixpkgs,
+    ...
+  } @ inputs: let
     lib = nixpkgs.lib.extend (self: super:
       import ./lib {
         inherit inputs profiles pkgs nixosConfigurations;
@@ -43,41 +47,41 @@
     profiles = lib.rnl.mkProfiles ./profiles;
   in {
     inherit nixosConfigurations overlays;
-    
+
     formatter.x86_64-linux = nixpkgs.legacyPackages.x86_64-linux.alejandra;
 
     checks.x86_64-linux.pre-commit-check = inputs.pre-commit-hooks.lib.x86_64-linux.run {
       src = ./.;
-          hooks = {
-            # Nix
-            alejandra.enable = true;
-            statix.enable = true;
-            deadnix.enable = true;
+      hooks = {
+        # Nix
+        alejandra.enable = true;
+        statix.enable = true;
+        deadnix.enable = true;
 
-            # Shell
-            shellcheck.enable = true;
-            shfmt.enable = true;
+        # Shell
+        shellcheck.enable = true;
+        shfmt.enable = true;
 
-            # Git
-            check-merge-conflicts.enable = true;
-            forbid-new-submodules.enable = true;
+        # Git
+        check-merge-conflicts.enable = true;
+        forbid-new-submodules.enable = true;
 
-            typos.enable = true;
-          };
-     
-      apps.x86_64-linux.deploy = {
-        type = "app";
-        program = "${inputs.herdnix.legacyPackages.x86_64-linux.herdnix}/bin/herdnix";
+        typos.enable = true;
       };
+    };
 
-      devShells.x86_64-linux.default = inputs.nixpkgs.legacyPackages.x86_64-linux.mkShell {
-        inherit (self.checks.x86_64-linux.pre-commit-check) shellHook;
-        buildInputs = self.checks.x86_64-linux.pre-commit-check.enabledPackages;
+    apps.x86_64-linux.deploy = {
+      type = "app";
+      program = "${inputs.herdnix.packages.x86_64-linux.herdnix}/bin/herdnix";
+    };
 
-        packages = [
-          inputs.herdnix.legacyPackages.x86_64-linux.herdnix
-        ];
-      };
+    devShells.x86_64-linux.default = inputs.nixpkgs.legacyPackages.x86_64-linux.mkShell {
+      inherit (self.checks.x86_64-linux.pre-commit-check) shellHook;
+      buildInputs = self.checks.x86_64-linux.pre-commit-check.enabledPackages;
+
+      packages = [
+        inputs.herdnix.packages.x86_64-linux.herdnix
+      ];
     };
   };
 }
