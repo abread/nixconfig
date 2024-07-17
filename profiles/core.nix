@@ -114,6 +114,12 @@
     fallbackDns = ["2606:4700:4700::1111" "1.0.0.1" "2606:4700:4700::1001" "1.1.1.1"];
   };
 
+  # Enable deployer everywhere
+  modules.herdnix.enable = true;
+
+  # Set deployment keys when using the automatic user
+  users.users."${config.modules.herdnix.deploymentUser}".openssh.authorizedKeys.keys = lib.mkIf config.modules.herdnix.createDeploymentUser inputs.hidden.deployAuthorizedKeys;
+
   # Disable manual user management
   users.mutableUsers = lib.mkDefault false;
 
