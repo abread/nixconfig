@@ -38,6 +38,9 @@ in {
     "${deployUserName}" = {
       isNormalUser = true;
       hashedPassword = "!"; # no password login allowed
+      home = "/var/empty";
+      createHome = false;
+      group = "nogroup";
       openssh.authorizedKeys.keys = inputs.hidden.headlessDeployAuthorizedKeys;
     };
   };
