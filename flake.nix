@@ -35,7 +35,7 @@
     nixpkgs,
     ...
   } @ inputs: let
-    lib = nixpkgs.lib.extend (self: super:
+    lib = nixpkgs.lib.extend (self: _super:
       import ./lib {
         inherit inputs profiles pkgs nixosConfigurations;
         lib = self;
@@ -55,7 +55,7 @@
       hooks = {
         # Nix
         alejandra.enable = true;
-        statix.enable = true;
+        #statix.enable = true; # I like having multiple services.*/programs.* attributions.
         deadnix.enable = true;
 
         # Shell
