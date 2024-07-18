@@ -93,11 +93,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1721265832,
-        "narHash": "sha256-9jMB9nPI+EAZuCCvUCoTp6qQBOqbLBJaFbwbvg7hd1g=",
+        "lastModified": 1721351390,
+        "narHash": "sha256-AZCZhC84VBIFF3mA+g2t73h5aqVwaxYPTTtm9q5uyD0=",
         "owner": "abread",
         "repo": "herdnix",
-        "rev": "3bd6276ff627629789cce35c5abd25c190805d42",
+        "rev": "7b497808de2296fab49d9ab9a762f3ac2c7c999b",
         "type": "github"
       },
       "original": {

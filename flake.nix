@@ -70,7 +70,9 @@
       };
     };
 
-    apps.x86_64-linux.deploy = {
+    herdnix-hosts = inputs.herdnix.packages.x86_64-linux.herdnix-hosts.override {inherit nixosConfigurations;};
+
+    apps.x86_64-linux.herdnix = {
       type = "app";
       program = "${inputs.herdnix.packages.x86_64-linux.herdnix}/bin/herdnix";
     };
