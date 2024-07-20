@@ -1,66 +1,10 @@
 {
   lib,
-  pkgs,
-  profiles,
+  withSystem,
   inputs,
-  nixosConfigurations,
   ...
 } @ args: let
   inherit (lib.rnl) rakeLeaves;
-
-  /*
-  *
-  Synopsis: mkPkgs overlays
-
-  Generate an attribute set representing Nix packages with custom overlays.
-
-  Inputs:
-  - overlays: An attribute set of overlays to apply on top of the main Nixpkgs.
-
-  Output Format:
-  An attribute set representing Nix packages with custom overlays applied.
-  The function imports the main Nixpkgs and applies additional overlays defined in the `overlays` argument.
-  It then merges the overlays with the provided `argsPkgs` attribute set.
-
-  *
-  */
-  mkPkgs = overlays: let
-    argsPkgs = {
-      system = "x86_64-linux"; # FIXME: Allow other systems
-      config.allowUnfree = true;
-    };
-  in
-    import inputs.nixpkgs ({
-        overlays =
-          [
-            #(self: super: {
-            #  unstable = import inputs.unstable argsPkgs;
-            #})
-            (import ../patches)
-          ]
-          ++ lib.attrValues overlays;
-      }
-      // argsPkgs);
-
-  /*
-  *
-  Synopsis: mkOverlays overlaysDir
-
-  Generate overlays for Nix expressions found in the specified directory.
-
-  Inputs:
-  - overlaysDir: The path to the directory containing Nix expressions.
-
-  Output Format:
-  An attribute set representing Nix overlays.
-  The function recursively scans the `overlaysDir` directory for Nix expressions and imports each overlay.
-
-  *
-  */
-  mkOverlays = overlaysDir:
-    lib.mapAttrsRecursive
-    (_: module: import module {inherit rakeLeaves inputs;})
-    (lib.rnl.rakeLeaves overlaysDir);
 
   /*
   *
@@ -96,7 +40,7 @@
   - extraModules: An optional list of additional NixOS modules to include in the configuration.
 
   Output Format:
-  A NixOS system configuration representing the specified hostname. The function generates a NixOS system configuration using the provided parameters and additional modules. It inherits attributes from `pkgs`, `lib`, `profiles`, `inputs`, `nixosConfigurations`, and other custom modules.
+  A NixOS system configuration representing the specified hostname. The function generates a NixOS system configuration using the provided parameters and additional modules. It inherits attributes from `pkgs`, `lib`, `profiles`, `inputs`, and other custom modules.
 
   *
   */
@@ -104,21 +48,22 @@
   mkHost = hostname: {
     system,
     hostPath,
+    profiles,
     extraModules ? [],
     ...
   }:
-    lib.nixosSystem {
-      inherit system pkgs lib;
-      specialArgs = {inherit profiles inputs nixosConfigurations;};
-      modules =
-        #(lib.collect builtins.isPath (lib.rnl.rakeLeaves ../modules))
-        []
-        ++ [
-          {networking.hostName = hostname;}
-          hostPath
-        ]
-        ++ extraModules;
-    };
+    withSystem system ({pkgs, ...}:
+      lib.nixosSystem {
+        inherit system pkgs lib;
+        specialArgs = {inherit profiles inputs;};
+        modules =
+          (lib.collect builtins.isPath (lib.rnl.rakeLeaves ../modules))
+          ++ [
+            {networking.hostName = hostname;}
+            hostPath
+          ]
+          ++ extraModules;
+      });
 
   /*
   *
@@ -137,7 +82,7 @@
   hostnames to their corresponding NixOS system configurations.
   *
   */
-  mkHosts = hostsDir:
+  mkHosts = hostsDir: extraCfg:
     lib.listToAttrs (lib.lists.flatten (lib.mapAttrsToList (name: type: let
         # Get hostname from host path
         hostPath = hostsDir + "/${name}";
@@ -147,10 +92,11 @@
         # Merge default configuration with host configuration (if it exists)
         cfg =
           {
-            inherit hostPath pkgs profiles inputs;
-            system = "x86_64-linux";
+            inherit hostPath inputs;
+            system = "x86_64-linux"; # default, may be overridden by hostCfg
             aliases = null;
           }
+          // extraCfg
           // hostCfg;
 
         hostCfg =
@@ -166,13 +112,14 @@
           else {${hostname} = {extraModules = [];};};
         cfg' = lib.filterAttrs (name: _: name != "aliases") cfg;
         aliases = lib.mapAttrs (_: value: (value // cfg')) aliases';
-      in (lib.mapAttrsToList (hostname: alias: {
+      in
+        lib.mapAttrsToList (hostname: alias: {
           name = hostname;
           value = mkHost hostname alias;
         })
-        aliases))
+        aliases)
       # Ignore hosts starting with an underscore
       (lib.filterAttrs (path: _: !(lib.hasPrefix "_" path)) (builtins.readDir hostsDir))));
 in {
-  inherit mkProfiles mkHosts mkPkgs mkOverlays;
+  inherit mkProfiles mkHosts;
 }
