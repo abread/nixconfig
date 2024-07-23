@@ -4,7 +4,7 @@
     {
       home-manager.useGlobalPkgs = true;
       home-manager.useUserPackages = true;
-      home-manager.users.breda = import ./user-breda-home;
+      home-manager.users.breda = import ./user-breda-home.nix;
     }
   ];
 
@@ -13,6 +13,7 @@
     uid = 1001;
     shell = pkgs.zsh;
     extraGroups = ["wheel" "video" "render" "networkmanager" "dialout" "adbusers"]; # Enable ‘sudo’ for the user.
+    hashedPassword = inputs.hidden.userHashedPasswords.${config.networking.hostname}.breda;
   };
 
   programs.zsh.enable = true; # generate /etc/zprofile
