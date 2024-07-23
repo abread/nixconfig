@@ -21,13 +21,11 @@
     peerEndpoint = lib.mkOption {
       type = lib.types.str;
       description = "RNL Wireguard endpoint";
-      default = builtins.readFile "../hidden/wgrnl_peer_endpoint";
     };
 
     peerPubkey = lib.mkOption {
       type = lib.types.str;
       description = "RNL Wireguard public key";
-      default = builtins.readFile "../hidden/wgrnl_peer_pubkey";
     };
 
     fwmark = lib.mkOption {

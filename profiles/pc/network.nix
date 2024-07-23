@@ -1,5 +1,6 @@
 {
   lib,
+  inputs,
   config,
   ...
 }: {
@@ -16,5 +17,7 @@
   networking.wgrnl = lib.mkIf (config.networking.wgrnl.id != null) {
     enable = true;
     ownPrivateKeyFile = "/nix/secrets/wgrnl-privkey";
+    peerEndpoint = inputs.hidden.wgrnl.peerEndpoint;
+    peerPubkey = inputs.hidden.wgrnl.peerPubkey;
   };
 }
