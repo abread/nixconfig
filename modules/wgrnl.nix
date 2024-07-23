@@ -92,10 +92,10 @@
 
           addresses = [
             {
-              addressConfig.Address = "192.168.20.${cfg.id}/24";
+              addressConfig.Address = "192.168.20.${builtins.toString cfg.id}/24";
             }
             {
-              addressConfig.Address = "fd92:3315:9e43:c490::${cfg.id}/64";
+              addressConfig.Address = "fd92:3315:9e43:c490::${builtins.toString cfg.id}/64";
               addressConfig.DuplicateAddressDetection = "none";
             }
           ];
