@@ -22,6 +22,7 @@
   nix.extraOptions = ''
     secret-key-files = /nix/secrets/nix-build-priv-key
   '';
+  modules.herdnix.deploymentUser = "breda";
 
   boot.loader.efi.canTouchEfiVariables = true; # ?
 
