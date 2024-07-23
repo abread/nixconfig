@@ -12,7 +12,6 @@
     profiles.core
     profiles.shell
 
-    ./unstable-pkgs-nix-cmd.nix
     ./flatpak.nix
     ./devtools.nix
     ./network.nix
