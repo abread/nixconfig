@@ -1,4 +1,4 @@
-self: super: {
+_final: _prev: {
   # For reference, this is how you do it:
   #
   #  openssh = super.openssh.overrideAttrs (oldAttrs: rec {
