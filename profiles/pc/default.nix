@@ -16,6 +16,7 @@
     ./devtools.nix
     ./network.nix
     ./virt.nix
+    ./user-breda
   ];
 
   # for now PCs can be build hosts

@@ -4,7 +4,7 @@
     {
       home-manager.useGlobalPkgs = true;
       home-manager.useUserPackages = true;
-      home-manager.users.breda = import ./user-breda-home.nix;
+      home-manager.users.breda = import ./home.nix;
     }
   ];
 
