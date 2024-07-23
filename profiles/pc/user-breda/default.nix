@@ -1,4 +1,9 @@
-{inputs, ...}: {
+{
+  config,
+  inputs,
+  pkgs,
+  ...
+}: {
   imports = [
     inputs.home-manager.nixosModules.home-manager
     {
@@ -12,9 +17,9 @@
     isNormalUser = true;
     uid = 1001;
     shell = pkgs.zsh;
-    group = "breda";
+    group = "users";
     extraGroups = ["wheel" "video" "render" "networkmanager" "dialout" "adbusers"]; # Enable ‘sudo’ for the user.
-    hashedPassword = inputs.hidden.userHashedPasswords.${config.networking.hostname}.breda;
+    hashedPassword = inputs.hidden.userHashedPasswords.${config.networking.hostName}.breda;
   };
 
   programs.zsh.enable = true; # generate /etc/zprofile
