@@ -4,6 +4,8 @@
   pkgs,
   ...
 }: {
+  services.flatpak.enable = true;
+
   # Flatpak applications cannot follow symlinks to the nix store, so we create bindmounts to resolve them transparently
   system.fsPackages = [pkgs.bindfs];
   fileSystems = let
