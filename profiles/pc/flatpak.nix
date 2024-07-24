@@ -1,4 +1,5 @@
 {
+  lib,
   config,
   pkgs,
   ...
@@ -21,7 +22,7 @@
   in {
     # Create an FHS mount to support flatpak host icons/fonts/wtv
     #"/usr/share/applications" = mkRoSymBind (config.system.path + "/share/applications");
-    "/usr/share/icons" = mkRoSymBind (config.system.path + "/share/icons");
+    "/usr/share/icons" = lib.mkIf config.xdg.icons.enable (mkRoSymBind (config.system.path + "/share/icons"));
     "/usr/share/fonts" = mkRoSymBind (aggregatedFonts + "/share/fonts");
   };
 }

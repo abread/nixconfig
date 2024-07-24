@@ -87,4 +87,63 @@
       };
     };
   };
+
+  xdg.portal.enable = true;
+  #environment.variables.GTK_USE_PORTAL = "1"; # try leaving it off
+  environment.variables.GDK_BACKEND = "wayland";
+  environment.variables.MOZ_ENABLE_WAYLAND = "1";
+  systemd.user.services.xdg-desktop-portal.wantedBy = ["sway-session.target"];
+  systemd.user.services.xdg-desktop-portal-wlr.wantedBy = ["sway-session.target"];
+  systemd.user.services.xdg-desktop-portal-gtk.wantedBy = ["sway-session.target"];
+  xdg.portal.wlr.enable = true;
+  xdg.portal.extraPortals = [
+    pkgs.xdg-desktop-portal-gtk
+    #pkgs.xdg-desktop-portal-wlr # try leaving it off, should be added by xdg.portal.wlr.enable
+  ];
+  # Make xdg-desktop-portal aware of each portals (should be upstreamed)
+  # NixOS 24.05: og var disappeared ???
+  #systemd.user.services.xdg-desktop-portal.environment = {
+  #  XDG_DESKTOP_PORTAL_DIR = config.environment.variables.XDG_DESKTOP_PORTAL_DIR;
+  #};
+
+  xdg.portal.wlr.settings = {
+    screencast = {
+      # TODO: inhibit notifications, see mako modes
+      chooser_type = "simple";
+      chooser_cmd = "${pkgs.slurp}/bin/slurp -f %o -or";
+    };
+  };
+  xdg.portal.config = {
+    common = {
+      default = ["*"];
+      "org.freedesktop.impl.portal.Secret" = ["gnome-keyring"];
+    };
+    sway = {
+      default = ["gtk"];
+      "org.freedesktop.impl.portal.Screenshot" = ["wlr"];
+      "org.freedesktop.impl.portal.ScreenCast" = ["wlr"];
+      "org.freedesktop.impl.portal.Secret" = ["gnome-keyring"];
+    };
+  };
+
+  systemd.user.extraConfig = ''
+    DefaultEnvironment="PATH=/run/current-system/sw/bin"
+  '';
+
+  xdg.icons.enable = true;
+  xdg.sounds.enable = true;
+
+  services.syncthing = {
+    enable = true;
+    openDefaultPorts = true;
+
+    user = "breda";
+    dataDir = "/home/breda";
+    configDir = "/home/breda/.config/syncthing";
+  };
+
+  # Use Ozone Wayland in "Chrome and several electron apps"
+  environment.sessionVariables.NIXOS_OZONE_WL = "1";
+
+  environment.pathsToLink = ["/libexec" "/share/zsh" "/share/backgrounds/sway"];
 }

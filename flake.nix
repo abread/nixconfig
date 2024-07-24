@@ -1,5 +1,6 @@
 {
   inputs = {
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
     flake-programs-sqlite = {
       # command-not-found

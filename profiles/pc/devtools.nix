@@ -1,4 +1,8 @@
-{pkgs, ...}: let
+{
+  config,
+  pkgs,
+  ...
+}: let
   vscode-with-ext = pkgs.vscode-with-extensions.override {
     vscodeExtensions = with pkgs.vscode-extensions;
       [
@@ -61,6 +65,7 @@ in {
     pmd
     hyperfine
     hexedit
+    colordiff
     delta
     man-pages
     man-pages-posix
@@ -69,12 +74,20 @@ in {
     lldb
     llvmPackages_18.libllvm # ensure llvm-symbolizer is on PATH, lldb needs it
     binutils
+    ltrace
     valgrind
     massif-visualizer
     gnumake
+    parallel
     jq
     bc
+    dialog
     picocom
+    mmv
+    shellcheck
+    traceroute
+    dig
+    whois
 
     # Language-specific stuff
     rustup
@@ -148,4 +161,9 @@ in {
   ];
 
   programs.adb.enable = true;
+
+  documentation.dev.enable = true;
+
+  # rr-zen_workaround causes trouble with suspend, so we don't enable it by default
+  boot.extraModulePackages = [config.boot.kernelPackages.rr-zen_workaround];
 }

@@ -12,6 +12,11 @@
   boot.initrd.kernelModules = [];
   boot.kernelModules = ["kvm-amd"];
   boot.extraModulePackages = [];
+  boot.kernelParams = [
+    "acpi_backlight=native"
+    "tsc=unstable" # TSC clock is unstable, disabling, yada yada yada
+    "tpm_tis.interrupts=0" # [Firmware Bug]: TPM interrupt not working, polling instead
+  ];
 
   fileSystems."/" = {
     device = "/dev/disk/by-uuid/d195ff4a-4782-4ae9-9526-7e282082071f";
@@ -61,6 +66,31 @@
   # we have a smartcard reader!
   services.pcscd.enable = true;
 
+  # we have an SSD
+  services.fstrim.enable = true;
+
   # we have a key for wireguard!
   networking.wgrnl.id = 12;
+
+  # these USBs cannot have powersave on
+  powerManagement.powerUpCommands = ''
+    echo on > /sys/bus/usb/devices/usb3/power/control
+    echo on > /sys/bus/usb/devices/usb1/power/control
+  '';
+
+  services.restic.backups.tightpants = {
+    repository = "rclone:b2-backups-tightpants:backups-tightpants/";
+    rcloneConfigFile = "/home/breda/.config/rclone/rclone.conf";
+    passwordFile = "/nix/persist/restic-password";
+    paths = ["/home/breda" "/etc/nixos" "/etc/NetworkManager/system-connections"];
+    pruneOpts = ["--dry-run"];
+    extraBackupArgs = ["--compression" "max" "--pack-size" "128" "--one-file-system" "--exclude-caches" "--exclude-file /home/breda/.config/restic/excludes.txt"];
+    timerConfig = {
+      OnCalendar = "Mon,Wed,Fri,Sun *-*-* 00:00:00";
+      Persistent = true;
+      WakeSystem = false;
+      RandomizedDelaySec = 86400;
+      AccuracySec = 3600;
+    };
+  };
 }

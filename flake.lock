@@ -235,6 +235,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-unstable": {
+      "locked": {
+        "lastModified": 1721562059,
+        "narHash": "sha256-Tybxt65eyOARf285hMHIJ2uul8SULjFZbT9ZaEeUnP8=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "68c9ed8bbed9dfce253cc91560bf9043297ef2fe",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "pre-commit-hooks": {
       "inputs": {
         "flake-compat": [
@@ -273,6 +289,7 @@
         "home-manager": "home-manager",
         "lanzaboote": "lanzaboote",
         "nixpkgs": "nixpkgs",
+        "nixpkgs-unstable": "nixpkgs-unstable",
         "pre-commit-hooks": "pre-commit-hooks"
       }
     },
