@@ -150,11 +150,11 @@
     },
     "hidden": {
       "locked": {
-        "lastModified": 1721758078,
-        "narHash": "sha256-6oJfO5+3/PKTlJEBuLpRM16eb0DMsnE+ph0WLAZE3nY=",
+        "lastModified": 1721778079,
+        "narHash": "sha256-Izx5p3hZXW7cPnYeDSUTYDn5XAV39zMtCEg0FYKJ6kA=",
         "ref": "refs/heads/main",
-        "rev": "c9f5df9e3be469bcf7a5c50eec6e792cedfcece1",
-        "revCount": 7,
+        "rev": "edb2788c2d1c1ba683893931bd100ce348063f81",
+        "revCount": 8,
         "type": "git",
         "url": "file:///home/breda/Documents/nixconfig/hidden"
       },

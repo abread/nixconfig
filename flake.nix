@@ -25,10 +25,6 @@
         flake-compat.follows = "flake-compat";
       };
     };
-    flake-parts = {
-      url = "github:hercules-ci/flake-parts";
-      inputs.nixpkgs-lib.follows = "nixpkgs";
-    };
     lanzaboote = {
       url = "github:nix-community/lanzaboote/v0.4.1";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -48,75 +44,56 @@
       url = "github:edolstra/flake-compat";
       flake = false;
     };
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = inputs:
-    inputs.flake-parts.lib.mkFlake {inherit inputs;} ({
-      self,
-      withSystem,
-      ...
-    }: let
-      lib = inputs.nixpkgs.lib.extend (self: _super:
-        import ./lib {
-          inherit inputs withSystem;
-          lib = self;
-        });
-    in {
-      imports = [
-        # TODO: see if this works well
-        # Derive the output overlay automatically from all packages that we define(?)
-        # inputs.flake-parts.flakeModules.easyOverlay
+  outputs = inputs @ {
+    self,
+    nixpkgs,
+    ...
+  }: let
+    lib = nixpkgs.lib.extend (final: _prev:
+      import ./lib {
+        inherit inputs profiles multiPkgs nixosConfigurations;
+        lib = final;
+      });
+    systems = ["x86_64-linux" "aarch64-linux"];
+    forAllSystems = nixpkgs.lib.genAttrs systems;
+    ownPkgBuilder = pkgs: (lib.mapAttrsRecursive
+      (_: path: (pkgs.callPackage path {inherit inputs;}))
+      (lib.rnl.rakeLeaves ./pkgs));
+    ownPkgsOverlay = _final: prev: ownPkgBuilder prev;
+    multiPkgs = forAllSystems (system: lib.rnl.mkPkgs system [ownPkgsOverlay]);
+    profiles = lib.rnl.mkProfiles ./profiles;
+    nixosConfigurations = lib.rnl.mkHosts ./hosts;
+  in {
+    inherit nixosConfigurations;
 
-        inputs.pre-commit-hooks.flakeModule
-      ];
-      flake = {
-        nixosConfigurations = lib.rnl.mkHosts ./hosts {
-          profiles = lib.rnl.mkProfiles ./profiles;
-        };
+    overlays.default = ownPkgsOverlay;
+
+    packages = forAllSystems (system:
+      (ownPkgBuilder inputs.nixpkgs.legacyPackages.${system})
+      // {
+        herdnix-hosts = inputs.herdnix.packages.${system}.herdnix-hosts.override {inherit nixosConfigurations;};
+      });
+
+    apps = forAllSystems (system: {
+      herdnix = {
+        type = "app";
+        program = "${inputs.herdnix.packages.${system}.herdnix}/bin/herdnix";
       };
-      systems = [
-        "x86_64-linux"
-      ];
-      perSystem = {
-        config,
-        system,
-        inputs',
-        pkgs,
-        ...
-      }: let
-        packages =
-          (
-            lib.mapAttrsRecursive
-            (_: path: (pkgs.callPackage path {inherit inputs';}))
-            (lib.rnl.rakeLeaves ./pkgs)
-          )
-          // {
-            # TODO: move to flake module within herdnix
-            # we build it as a package to ensure nixpkgs's trivial builders work well on all platforms
-            herdnix-hosts = inputs'.herdnix.packages.herdnix-hosts.override {inherit (self) nixosConfigurations;};
-          };
-      in {
-        #warnings = let
-        #  pkgConflicts = builtins.filter (pkgName: builtins.hasAttr pkgName inputs'.nixpkgs.legacyPackages) (builtins.attrNames self'.packages);
-        #in builtins.map (pkgName: ''${pkgName} exists in both this flake and nixpkgs. Using the version from this flake.'') pkgConflicts;
+    });
 
-        inherit packages;
+    formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
 
-        # Use nixpkgs with our overlays
-        _module.args.pkgs = import inputs.nixpkgs {
-          inherit system;
-          config.allowUnfree = true;
-          overlays = [
-            (import ./patches)
-            (_final: _prev: packages)
-          ];
-        };
-
-        apps.herdnix.program = "${inputs'.herdnix.packages.herdnix}/bin/herdnix";
-
-        formatter = pkgs.alejandra;
-        pre-commit.settings.hooks = {
+    checks = forAllSystems (system: {
+      pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
+        src = ./.;
+        hooks = {
           # Nix
           alejandra.enable = true;
           deadnix.enable = true;
@@ -134,14 +111,15 @@
             settings.configPath = "./typos.toml";
           };
         };
-
-        devShells.default = pkgs.mkShell {
-          inherit (config.pre-commit.devShell) shellHook buildInputs;
-
-          packages = [
-            inputs'.herdnix.packages.herdnix
-          ];
-        };
       };
     });
+
+    devShells = forAllSystems (system: {
+      default = nixpkgs.legacyPackages.${system}.mkShell {
+        inherit (self.checks.${system}.pre-commit-check) shellHook;
+        buildInputs = self.checks.${system}.pre-commit-check.enabledPackages;
+        packages = [inputs.herdnix.packages.${system}.herdnix];
+      };
+    });
+  };
 }
