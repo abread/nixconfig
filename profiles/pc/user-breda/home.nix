@@ -1,4 +1,5 @@
 {
+  hostConfig,
   config,
   inputs,
   pkgs,
@@ -46,10 +47,13 @@
 
   services.mpris-proxy.enable = true;
 
-  programs.starship = {
-    enable = true;
-    enableZshIntegration = true;
-  };
+  programs.starship =
+    hostConfig.programs.startship
+    // {
+      enable = true;
+      packages = pkgs.startship;
+      enableZshIntegration = true;
+    };
 
   #  wayland.windowManager.sway = let
   #        terminal = "${pkgs.foot}/bin/foot";

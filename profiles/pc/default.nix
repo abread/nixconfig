@@ -28,9 +28,8 @@
     pciutils
     nvme-cli
 
-    thunderbird
-    firefox
     (chromium.override {enableWideVine = true;})
+    thunderbird
     transmission-gtk
     gnome.seahorse
     libreoffice
@@ -105,7 +104,7 @@
   environment.pathsToLink = ["/share/hunspell" "/share/myspell"];
   environment.variables.DICPATH = "/run/current-system/sw/share/hunspell";
 
-  programs.chromium.enable = true;
+  programs.chromium.enable = true; # this only enables chromium policies, not chromium itself
   programs.chromium.extraOpts.AuthServerAllowlist = "id.tecnico.ulisboa.pt";
 
   programs.firefox = {

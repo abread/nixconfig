@@ -59,7 +59,6 @@ in {
     #lapce
 
     # Tools
-    git
     d2
     scc
     pmd
