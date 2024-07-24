@@ -10,11 +10,11 @@
 }:
 stdenv.mkDerivation rec {
   pname = "plugin-autenticacao-gov";
-  version = "20240315"; # no real versioning scheme
+  version = "20240724"; # no real versioning scheme
 
   src = fetchurl {
     url = "https://aplicacoes.autenticacao.gov.pt/plugin/plugin-autenticacao-gov.deb";
-    hash = "sha256-LWXWr05gQFkaYFCbVVk3PP/t6T2TL6tjBx6qnmWzInI=";
+    hash = "sha256-bQYYm8dzyQfQBuSEcE2vZHf/m2CWWTew62AHHqaTjGc=";
   };
 
   nativeBuildInputs = [makeWrapper dpkg];
