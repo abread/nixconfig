@@ -38,7 +38,7 @@
         {
           name = "gitblame";
           publisher = "waderyan";
-          version = "10.10.0";
+          version = "11.0.1";
           sha256 = "icJ0mvP8mJVO/n2M3xlCIoUdSy3MSbk3Z+B320VxOYU=";
         }
         {
