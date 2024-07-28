@@ -128,11 +128,11 @@
         "pre-commit-hooks": []
       },
       "locked": {
-        "lastModified": 1722183686,
-        "narHash": "sha256-3g4AQTomvPzE7pzYy3KSdOIIrDlVIDks+aUNw+0s05k=",
+        "lastModified": 1722186270,
+        "narHash": "sha256-s+iQYBKBUfalw+dw2t3JQ7WjOsR2B4xs63tm5XSf5oo=",
         "owner": "abread",
         "repo": "herdnix",
-        "rev": "56b824172c5d1dc37b94109bda9a433555108589",
+        "rev": "68e0c84eb77a7424ab3a1003a798120539523b9c",
         "type": "github"
       },
       "original": {
