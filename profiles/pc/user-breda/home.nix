@@ -27,6 +27,7 @@
     ignores = [
       ".gdb_history"
       ".vscode"
+      ".envrc"
     ];
 
     extraConfig = {
