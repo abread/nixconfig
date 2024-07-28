@@ -13,9 +13,7 @@
     herdnix = {
       url = "github:abread/herdnix";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.pre-commit-hooks.follows = "pre-commit-hooks";
-      inputs.flake-compat.follows = "flake-compat";
-      inputs.flake-parts.follows = "flake-parts";
+      inputs.pre-commit-hooks.follows = "";
     };
     hidden.url = "git+file:///home/breda/Documents/nixconfig/hidden";
     pre-commit-hooks = {
@@ -29,10 +27,9 @@
     lanzaboote = {
       url = "github:nix-community/lanzaboote/v0.4.1";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.pre-commit-hooks-nix.follows = "pre-commit-hooks";
+      inputs.pre-commit-hooks-nix.follows = "";
       inputs.flake-utils.follows = "flake-utils";
       inputs.flake-compat.follows = "flake-compat";
-      inputs.flake-parts.follows = "flake-parts";
     };
     home-manager = {
       url = "github:nix-community/home-manager/release-24.05";
@@ -44,10 +41,6 @@
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
-    };
-    flake-parts = {
-      url = "github:hercules-ci/flake-parts";
-      inputs.nixpkgs-lib.follows = "nixpkgs";
     };
     flake-utils.url = "github:numtide/flake-utils";
   };
@@ -76,11 +69,10 @@
 
     overlays.default = ownPkgsOverlay;
 
-    packages = forAllSystems (system:
-      (ownPkgBuilder inputs.nixpkgs.legacyPackages.${system})
-      // {
-        herdnix-hosts = inputs.herdnix.packages.${system}.herdnix-hosts.override {inherit nixosConfigurations;};
-      });
+    packages =
+      lib.recursiveUpdate
+      (forAllSystems (system: ownPkgBuilder inputs.nixpkgs.legacyPackages.${system}))
+      (inputs.herdnix.genHerdnixHostsPackages nixosConfigurations);
 
     apps = forAllSystems (system: {
       herdnix = {
