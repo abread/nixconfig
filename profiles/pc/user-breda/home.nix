@@ -28,6 +28,7 @@
       ".gdb_history"
       ".vscode"
       ".envrc"
+      ".direnv"
     ];
 
     extraConfig = {
