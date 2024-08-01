@@ -36,8 +36,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # We only have this input to pass it to other dependencies and
-    # avoid having multiple versions in our dependencies.
+    # We only have these inputs to pass to other dependencies and
+    # avoid having multiple versions in our flake.
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
