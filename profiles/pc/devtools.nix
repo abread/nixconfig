@@ -53,7 +53,7 @@ in {
   environment.systemPackages = with pkgs; [
     # Editors
     vscode-with-ext
-    jetbrains.idea-ultimate
+    #jetbrains.idea-ultimate
     #zed
     #helix
     #lapce
