@@ -147,13 +147,13 @@ in {
     ansible
     ansible-lint
 
-    terraform
+    #terraform
 
     kubectl
 
-    vagrant
+    #vagrant
 
-    packer
+    #packer
 
     flyctl
     fly
