@@ -18,7 +18,7 @@
         james-yu.latex-workshop
         ms-vsliveshare.vsliveshare
         bbenoist.nix
-        arrterian.nix-env-selector
+        mkhl.direnv
         #4ops.packer
         ms-python.vscode-pylance
         ms-python.python
