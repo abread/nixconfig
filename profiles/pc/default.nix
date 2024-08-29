@@ -74,6 +74,7 @@
     hunspellDicts.en_US-large
     wl-clipboard
     timewarrior
+    jmtpfs
 
     bluez5-experimental # bluetooth-autoconnect
     libnotify # notify-send
