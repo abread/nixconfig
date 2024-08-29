@@ -113,6 +113,7 @@
   };
 
   # for now PCs can be build hosts
+  nix.gc.automatic = lib.mkForce false;
   nix.extraOptions = ''
     secret-key-files = /nix/secrets/nix-build-priv-key
   '';
