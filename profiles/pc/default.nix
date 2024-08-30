@@ -38,6 +38,7 @@
     steam
     wdisplays
     pavucontrol
+    rquickshare
 
     plugin-autenticacao-gov
     pass-wayland
@@ -213,4 +214,8 @@
   };
   services.blueman.enable = true;
   services.upower.enable = true;
+
+  # open a port for rquickshare
+  networking.firewall.allowedTCPPorts = [31000];
+  networking.firewall.allowedUDPPorts = [31000];
 }
