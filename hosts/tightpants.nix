@@ -82,7 +82,7 @@
     repository = "rclone:b2-backups-tightpants:backups-tightpants/";
     rcloneConfigFile = "/home/breda/.config/rclone/rclone.conf";
     passwordFile = "/nix/persist/restic-password";
-    paths = ["/home/breda" "/etc/nixos" "/etc/NetworkManager/system-connections"];
+    paths = ["/home/breda" "/etc/NetworkManager/system-connections"];
     pruneOpts = ["--dry-run"];
     extraBackupArgs = ["--compression" "max" "--pack-size" "128" "--one-file-system" "--exclude-caches" "--exclude-file /home/breda/.config/restic/excludes.txt"];
     timerConfig = {
