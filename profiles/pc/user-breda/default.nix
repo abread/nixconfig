@@ -19,7 +19,17 @@
     uid = 1001;
     shell = pkgs.zsh;
     group = "users";
-    extraGroups = ["wheel" "video" "render" "networkmanager" "dialout" "adbusers"]; # Enable ‘sudo’ for the user.
+    extraGroups = [
+      # Enable ‘sudo’ for the user
+      "wheel"
+
+      "input"
+      "video"
+      "render"
+      "networkmanager"
+      "dialout"
+      "adbusers"
+    ];
     hashedPassword = inputs.hidden.userHashedPasswords.${config.networking.hostName}.breda;
   };
 
