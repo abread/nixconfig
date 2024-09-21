@@ -149,6 +149,7 @@ in {
 
     #terraform
 
+    kind
     kubectl
 
     #vagrant
@@ -158,6 +159,9 @@ in {
     flyctl
     fly
   ];
+
+  # kind tries docker in our setup by default :(
+  environment.variables.KIND_EXPERIMENTAL_PROVIDER = "podman";
 
   programs.adb.enable = true;
 
