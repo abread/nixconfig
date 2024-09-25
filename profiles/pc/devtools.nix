@@ -151,6 +151,11 @@ in {
 
     kind
     kubectl
+    kubectx
+    kustomize
+    kubernetes-helm
+    krew
+    k9s
 
     #vagrant
 

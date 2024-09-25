@@ -434,7 +434,7 @@
       TERMINAL = "alacritty -e";
       EDITOR = "nvim";
       BROWSER = "chromium";
-      PATH = "$HOME/.local/bin:$HOME/go/bin:$HOME/.cargo/bin:$PATH";
+      PATH = "$HOME/.krew/bin:$HOME/.local/bin:$HOME/go/bin:$HOME/.cargo/bin:$PATH";
       DICPATH = "~/.local/share/hunspell:$DICPATH";
       FZF_DEFAULT_COMMAND = "${pkgs.ripgrep}/bin/rg --files --no-ignore --hidden --follow --glob '!.git/*'";
       ELECTRON_TRASH = "gio";
