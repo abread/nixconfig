@@ -140,7 +140,7 @@ in {
     jdk
     maven
 
-    arduino
+    arduino-ide
     arduino-cli
     avrdude
 
