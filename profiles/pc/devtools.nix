@@ -156,6 +156,8 @@ in {
     kubernetes-helm
     krew
     k9s
+    clusterctl
+    vcluster
 
     #vagrant
 
