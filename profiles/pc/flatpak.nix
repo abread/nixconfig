@@ -6,6 +6,14 @@
 }: {
   services.flatpak.enable = true;
 
+  xdg.portal.enable = true;
+  xdg.icons.enable = true;
+  xdg.sounds.enable = true;
+
+  systemd.user.extraConfig = ''
+    DefaultEnvironment="PATH=/run/current-system/sw/bin"
+  '';
+
   # Flatpak applications cannot follow symlinks to the nix store, so we create bindmounts to resolve them transparently
   system.fsPackages = [pkgs.bindfs];
   fileSystems = let

@@ -98,7 +98,6 @@
     };
   };
 
-  xdg.portal.enable = true;
   #environment.variables.GTK_USE_PORTAL = "1"; # try leaving it off
   environment.variables.GDK_BACKEND = "wayland";
   environment.variables.MOZ_ENABLE_WAYLAND = "1";
@@ -135,13 +134,6 @@
       "org.freedesktop.impl.portal.Secret" = ["gnome-keyring"];
     };
   };
-
-  systemd.user.extraConfig = ''
-    DefaultEnvironment="PATH=/run/current-system/sw/bin"
-  '';
-
-  xdg.icons.enable = true;
-  xdg.sounds.enable = true;
 
   services.syncthing = {
     enable = true;
