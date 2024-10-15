@@ -14,6 +14,7 @@
 
     ./unstable-pkgs-nix-cmd.nix
     ./flatpak.nix
+    ./appimage.nix
     ./devtools.nix
     ./network.nix
     ./virt.nix
