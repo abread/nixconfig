@@ -123,5 +123,8 @@
   # Disable manual user management
   users.mutableUsers = lib.mkDefault false;
 
+  # store config revision in build
+  system.configurationRevision = inputs.self.rev or "dirty";
+
   system.stateVersion = "23.11"; # DO NOT CHANGE
 }
