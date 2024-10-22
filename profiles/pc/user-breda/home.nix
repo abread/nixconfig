@@ -46,8 +46,6 @@
     };
   };
 
-  services.mpris-proxy.enable = true;
-
   #  wayland.windowManager.sway = let
   #        terminal = "${pkgs.foot}/bin/foot";
   #        bemenu_opts = "-i -f --fn 'Fira Code 12' --nb '#100F10' --nf '#E0E6F0' --fb '#000000' --ff '#FFFFFF' --hb '#2A40B8' --hf '#FFFFFF' --scf '#34CFFF' -p '' -w -l 10'";
