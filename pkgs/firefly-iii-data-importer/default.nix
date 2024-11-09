@@ -6,7 +6,7 @@
   php83,
   ...
 }: let
-  version = "1.5.6";
+  version = "1.5.7";
   php = php83;
 in
   stdenv.mkDerivation {
@@ -15,7 +15,7 @@ in
 
     src = fetchzip {
       url = "https://github.com/firefly-iii/data-importer/releases/download/v${version}/DataImporter-v${version}.zip";
-      hash = "sha256-/giurIn+qQbfBgDBP9fEz5LqL9xCAeJWIcaBaH6lI64=";
+      hash = "sha256-VZ3S7suhJzCQFLhaUV5eKTXNMOti3kqYcOh0bYIvj68=";
       stripRoot = false;
     };
 
