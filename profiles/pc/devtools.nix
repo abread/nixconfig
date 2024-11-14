@@ -22,7 +22,7 @@
         #4ops.packer
         ms-python.vscode-pylance
         ms-python.python
-        matklad.rust-analyzer
+        pkgs.unstable.vscode-extensions.rust-lang.rust-analyzer #rust-lang.rust-analyzer
         bradlc.vscode-tailwindcss
         asvetliakov.vscode-neovim
         vscodevim.vim
