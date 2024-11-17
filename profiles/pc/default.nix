@@ -47,6 +47,7 @@
     wget
     zathura
     texlive.combined.scheme-full
+    pkgs.unstable.typst # typst # stable is <0.12
     hyfetch
     pdfpc
     rlwrap

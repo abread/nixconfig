@@ -76,9 +76,11 @@
       noto-fonts-cjk-serif
       noto-fonts-color-emoji
       fira-code
+      fira-math
       fira
       ibm-plex
       source-code-pro
+      source-sans
       carlito
       caladea
       liberation_ttf
