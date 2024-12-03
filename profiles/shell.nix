@@ -3,7 +3,8 @@
   inputs,
   pkgs,
   ...
-}: {
+}:
+{
   # Configure the shell itself
   programs.bash = {
     completion.enable = true;
@@ -111,7 +112,7 @@
         set listchars=tab:>\ ,trail:·,nbsp:·
       '';
       packages.myVimPackage = with pkgs.vimPlugins; {
-        start = [vim-nix];
+        start = [ vim-nix ];
       };
     };
   };

@@ -5,7 +5,8 @@
   config,
   profiles,
   ...
-}: {
+}:
+{
   imports = [
     inputs.herdnix.nixosModules.default
     profiles.shell
@@ -20,7 +21,7 @@
     };
     optimise = {
       automatic = true;
-      dates = ["05:15"];
+      dates = [ "05:15" ];
     };
 
     settings = {
@@ -28,13 +29,16 @@
       fallback = true;
 
       # we demand flakes
-      experimental-features = ["nix-command" "flakes"];
+      experimental-features = [
+        "nix-command"
+        "flakes"
+      ];
 
       # accept derivations built by build hosts
       trusted-public-keys = builtins.attrValues inputs.hidden.buildHostPubkeys;
 
       # do not allow randos to add binaries to the store by default
-      trusted-users = [];
+      trusted-users = [ ];
     };
   };
 
@@ -107,18 +111,24 @@
     enable = lib.mkDefault true;
     useRoutingFeatures = "client";
   };
-  networking.networkmanager.unmanaged = ["interface-name:tailscale0"];
+  networking.networkmanager.unmanaged = [ "interface-name:tailscale0" ];
 
   services.resolved = {
     enable = true;
-    fallbackDns = ["2606:4700:4700::1111" "1.0.0.1" "2606:4700:4700::1001" "1.1.1.1"];
+    fallbackDns = [
+      "2606:4700:4700::1111"
+      "1.0.0.1"
+      "2606:4700:4700::1001"
+      "1.1.1.1"
+    ];
   };
 
   # Enable deployer everywhere
   modules.herdnix.enable = true;
 
   # Set deployment keys when using the automatic user
-  users.users."${config.modules.herdnix.deploymentUser}".openssh.authorizedKeys.keys = lib.mkIf config.modules.herdnix.createDeploymentUser inputs.hidden.deployAuthorizedKeys;
+  users.users."${config.modules.herdnix.deploymentUser
+  }".openssh.authorizedKeys.keys = lib.mkIf config.modules.herdnix.createDeploymentUser inputs.hidden.deployAuthorizedKeys;
 
   # Disable manual user management
   users.mutableUsers = lib.mkDefault false;

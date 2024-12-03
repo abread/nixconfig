@@ -3,9 +3,11 @@
   inputs,
   pkgs,
   ...
-}: let
+}:
+let
   secureBootDir = "/nix/secrets/secureboot/";
-in {
+in
+{
   imports = [
     inputs.lanzaboote.nixosModules.lanzaboote
   ];

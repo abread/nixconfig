@@ -3,10 +3,12 @@
   inputs,
   profiles,
   ...
-}: let
+}:
+let
   dbName = "firefly-iii";
   domain = "fin.breda.pt";
-in {
+in
+{
   imports = [
     profiles.webserver
     profiles.postgres
@@ -31,13 +33,13 @@ in {
     };
   };
 
-  security.acme.certs."${domain}" = {};
+  security.acme.certs."${domain}" = { };
   services.nginx.virtualHosts."${domain}" = {
     useACMEHost = domain;
     forceSSL = true;
   };
 
-  services.postgresql.ensureDatabases = [dbName];
+  services.postgresql.ensureDatabases = [ dbName ];
   services.postgresql.ensureUsers = [
     {
       name = config.services.firefly-iii.user;

@@ -3,7 +3,8 @@
   inputs,
   pkgs,
   ...
-}: {
+}:
+{
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 
@@ -310,7 +311,7 @@
   #  };
 
   services.playerctld.enable = true;
-  systemd.user.services.playerctld.Install.WantedBy = ["sway-session.target"];
+  systemd.user.services.playerctld.Install.WantedBy = [ "sway-session.target" ];
 
   services.kanshi = {
     enable = true;
@@ -706,8 +707,8 @@
       }
       Coqtail
       {
-        plugin = nvim-treesitter.withPlugins (plugins:
-          with plugins; [
+        plugin = nvim-treesitter.withPlugins (
+          plugins: with plugins; [
             tree-sitter-c
             tree-sitter-go
             tree-sitter-zig
@@ -751,7 +752,8 @@
             tree-sitter-javascript
             tree-sitter-dockerfile
             tree-sitter-devicetree
-          ]);
+          ]
+        );
         config = ''
           lua require 'nvim-treesitter.configs'.setup { highlight = { enable = true } }
         '';

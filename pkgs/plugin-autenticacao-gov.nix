@@ -17,8 +17,11 @@ stdenv.mkDerivation rec {
     hash = "sha256-DGQka4HkyeOLI61Thzndc4IE3TsqzgqtLBVUnK+pIx4=";
   };
 
-  nativeBuildInputs = [makeWrapper dpkg];
-  buildInputs = [pcsclite];
+  nativeBuildInputs = [
+    makeWrapper
+    dpkg
+  ];
+  buildInputs = [ pcsclite ];
 
   unpackPhase = ''
     mkdir deb
@@ -30,7 +33,7 @@ stdenv.mkDerivation rec {
     mv deb/usr/share $out/
 
     makeWrapper ${jre}/bin/java $out/bin/${pname} \
-      --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [pcsclite]} \
+      --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ pcsclite ]} \
       --add-flags "-Dsun.java2d.xrender=false" \
       --add-flags "-jar $out/share/${pname}/${pname}.jar" \
       --add-flags "sj"

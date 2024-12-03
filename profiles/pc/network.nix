@@ -3,7 +3,8 @@
   inputs,
   config,
   ...
-}: {
+}:
+{
   networking.useDHCP = false;
   networking.networkmanager = {
     enable = true;

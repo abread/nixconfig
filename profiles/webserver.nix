@@ -3,8 +3,12 @@
   inputs,
   lib,
   ...
-}: {
-  networking.firewall.allowedTCPPorts = [80 443];
+}:
+{
+  networking.firewall.allowedTCPPorts = [
+    80
+    443
+  ];
 
   services.nginx = {
     enable = true;
@@ -22,12 +26,12 @@
 
   security.dhparams = {
     enable = true;
-    params.nginx = {};
+    params.nginx = { };
   };
 
   security.acme.acceptTerms = true;
   security.acme.defaults = {
-    reloadServices = ["nginx"];
+    reloadServices = [ "nginx" ];
     email = inputs.hidden.robotsEmail "acme-${config.networking.hostname}";
     dnsProvider = "ovh";
     environmentFile = "/var/acme_env"; # TODO: better/safer way to store this?

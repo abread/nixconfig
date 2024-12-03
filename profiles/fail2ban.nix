@@ -2,10 +2,12 @@
   lib,
   config,
   ...
-}: let
+}:
+let
   inherit (lib) mkIf;
   inherit (config) services;
-in {
+in
+{
   services.fail2ban = {
     enable = true;
     ignoreIP = [

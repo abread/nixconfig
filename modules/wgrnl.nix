@@ -2,8 +2,9 @@
   lib,
   config,
   ...
-}: {
-  imports = [];
+}:
+{
+  imports = [ ];
 
   options.networking.wgrnl = {
     enable = lib.mkEnableOption "wgrnl";
@@ -35,11 +36,12 @@
     };
   };
 
-  config = let
-    cfg = config.networking.wgrnl;
-  in
+  config =
+    let
+      cfg = config.networking.wgrnl;
+    in
     lib.mkIf cfg.enable {
-      networking.networkmanager.unmanaged = lib.mkIf config.networking.networkmanager.enable ["wgrnl"];
+      networking.networkmanager.unmanaged = lib.mkIf config.networking.networkmanager.enable [ "wgrnl" ];
 
       systemd.network = {
         enable = true;
@@ -121,7 +123,7 @@
             }
           ];
 
-          ntp = ["ntp.rnl.tecnico.ulisboa.pt"];
+          ntp = [ "ntp.rnl.tecnico.ulisboa.pt" ];
 
           dns = [
             "2001:690:2100:80::1"
@@ -151,9 +153,7 @@
             ]
             ++ (
               # private ranges (DSI-assigned)
-              builtins.map
-              (octet: "~" + (builtins.toString octet) + ".16.10.in-addr.arpa")
-              (lib.range 64 127)
+              builtins.map (octet: "~" + (builtins.toString octet) + ".16.10.in-addr.arpa") (lib.range 64 127)
             );
         };
       };

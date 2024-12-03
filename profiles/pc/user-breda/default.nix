@@ -3,14 +3,15 @@
   inputs,
   pkgs,
   ...
-}: {
+}:
+{
   imports = [
     inputs.home-manager.nixosModules.home-manager
     {
       home-manager.useGlobalPkgs = true;
       home-manager.useUserPackages = true;
       home-manager.users.breda = import ./home.nix;
-      home-manager.extraSpecialArgs = {inherit inputs;};
+      home-manager.extraSpecialArgs = { inherit inputs; };
     }
   ];
 
@@ -92,19 +93,29 @@
     fontconfig = {
       allowBitmaps = false;
       defaultFonts = {
-        serif = ["IBM Plex Serif" "Noto Serif" "Noto Sans CJK JP"];
-        sansSerif = ["IBM Plex Sans" "Noto Sans CJK JP"];
-        monospace = ["Fira Code" "Noto Sans Mono CJK JP"];
-        emoji = ["Noto Color Emoji"];
+        serif = [
+          "IBM Plex Serif"
+          "Noto Serif"
+          "Noto Sans CJK JP"
+        ];
+        sansSerif = [
+          "IBM Plex Sans"
+          "Noto Sans CJK JP"
+        ];
+        monospace = [
+          "Fira Code"
+          "Noto Sans Mono CJK JP"
+        ];
+        emoji = [ "Noto Color Emoji" ];
       };
     };
   };
 
   environment.variables.GDK_BACKEND = "wayland";
   environment.variables.MOZ_ENABLE_WAYLAND = "1";
-  systemd.user.services.xdg-desktop-portal.wantedBy = ["sway-session.target"];
-  systemd.user.services.xdg-desktop-portal-wlr.wantedBy = ["sway-session.target"];
-  systemd.user.services.xdg-desktop-portal-gtk.wantedBy = ["sway-session.target"];
+  systemd.user.services.xdg-desktop-portal.wantedBy = [ "sway-session.target" ];
+  systemd.user.services.xdg-desktop-portal-wlr.wantedBy = [ "sway-session.target" ];
+  systemd.user.services.xdg-desktop-portal-gtk.wantedBy = [ "sway-session.target" ];
   xdg.portal.wlr.enable = true;
   xdg.portal.extraPortals = [
     pkgs.xdg-desktop-portal-gtk
@@ -125,14 +136,14 @@
   };
   xdg.portal.config = {
     common = {
-      default = ["*"];
-      "org.freedesktop.impl.portal.Secret" = ["gnome-keyring"];
+      default = [ "*" ];
+      "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
     };
     sway = {
-      default = ["gtk"];
-      "org.freedesktop.impl.portal.Screenshot" = ["wlr"];
-      "org.freedesktop.impl.portal.ScreenCast" = ["wlr"];
-      "org.freedesktop.impl.portal.Secret" = ["gnome-keyring"];
+      default = [ "gtk" ];
+      "org.freedesktop.impl.portal.Screenshot" = [ "wlr" ];
+      "org.freedesktop.impl.portal.ScreenCast" = [ "wlr" ];
+      "org.freedesktop.impl.portal.Secret" = [ "gnome-keyring" ];
     };
   };
 
@@ -148,5 +159,9 @@
   # Use Ozone Wayland in "Chrome and several electron apps"
   environment.sessionVariables.NIXOS_OZONE_WL = "1";
 
-  environment.pathsToLink = ["/libexec" "/share/zsh" "/share/backgrounds/sway"];
+  environment.pathsToLink = [
+    "/libexec"
+    "/share/zsh"
+    "/share/backgrounds/sway"
+  ];
 }

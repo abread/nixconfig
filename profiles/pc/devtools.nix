@@ -2,9 +2,11 @@
   config,
   pkgs,
   ...
-}: let
+}:
+let
   vscode-with-ext = pkgs.vscode-with-extensions.override {
-    vscodeExtensions = with pkgs.vscode-extensions;
+    vscodeExtensions =
+      with pkgs.vscode-extensions;
       [
         tamasfe.even-better-toml
         ms-vscode.cpptools
@@ -22,7 +24,7 @@
         #4ops.packer
         ms-python.vscode-pylance
         ms-python.python
-        pkgs.unstable.vscode-extensions.rust-lang.rust-analyzer #rust-lang.rust-analyzer
+        pkgs.unstable.vscode-extensions.rust-lang.rust-analyzer # rust-lang.rust-analyzer
         bradlc.vscode-tailwindcss
         asvetliakov.vscode-neovim
         vscodevim.vim
@@ -49,7 +51,8 @@
         }
       ];
   };
-in {
+in
+{
   environment.systemPackages = with pkgs; [
     # Editors
     vscode-with-ext
@@ -130,8 +133,12 @@ in {
           inherit version;
           hash = "sha256-V+GgpO3dIzTo16fA34D1CXt49UgP+oQwfy5QjfmLaHg=";
         };
-        buildInputs = [pkgs.python311Packages.hatchling pkgs.python311Packages.hatch-nodejs-version pkgs.python311Packages.hatch-jupyter-builder];
-        propagatedBuildInputs = [pkgs.python311Packages.jupyterlab];
+        buildInputs = [
+          pkgs.python311Packages.hatchling
+          pkgs.python311Packages.hatch-nodejs-version
+          pkgs.python311Packages.hatch-jupyter-builder
+        ];
+        propagatedBuildInputs = [ pkgs.python311Packages.jupyterlab ];
       })
     ]))
     python311Packages.pip
@@ -175,5 +182,5 @@ in {
   documentation.dev.enable = true;
 
   # rr-zen_workaround causes trouble with suspend, so we don't enable it by default
-  boot.extraModulePackages = [config.boot.kernelPackages.rr-zen_workaround];
+  boot.extraModulePackages = [ config.boot.kernelPackages.rr-zen_workaround ];
 }

@@ -2,10 +2,12 @@
   config,
   profiles,
   ...
-}: let
+}:
+let
   domain = "findi.breda.pt";
   fireflyUrl = "https://fin.breda.pt";
-in {
+in
+{
   imports = [
     profiles.webserver
   ];
@@ -34,7 +36,7 @@ in {
     };
   };
 
-  security.acme.certs."${domain}" = {};
+  security.acme.certs."${domain}" = { };
   services.nginx.virtualHosts."${domain}" = {
     useACMEHost = domain;
     forceSSL = true;
@@ -54,8 +56,14 @@ in {
 
   systemd.services."firefly-iii-data-importer-autoimport" = {
     description = "Firefly III Data Importer Auto Import";
-    requires = ["nginx.service" "phpfpm-firefly-iii-data-importer.service"];
-    after = ["nginx.service" "phpfpm-firefly-iii-data-importer.service"];
+    requires = [
+      "nginx.service"
+      "phpfpm-firefly-iii-data-importer.service"
+    ];
+    after = [
+      "nginx.service"
+      "phpfpm-firefly-iii-data-importer.service"
+    ];
 
     serviceConfig = {
       Type = "oneshot";
@@ -80,7 +88,7 @@ in {
       AccuracySec = "2min";
       Persistent = "true";
     };
-    wantedBy = ["timers.target"];
+    wantedBy = [ "timers.target" ];
   };
 
   # TODO: backups?

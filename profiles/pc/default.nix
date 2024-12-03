@@ -4,7 +4,8 @@
   pkgs,
   lib,
   ...
-}: {
+}:
+{
   imports = [
     # working (and fast) command-not-found with flakes
     inputs.flake-programs-sqlite.nixosModules.programs-sqlite
@@ -29,7 +30,7 @@
     pciutils
     nvme-cli
 
-    (chromium.override {enableWideVine = true;})
+    (chromium.override { enableWideVine = true; })
     thunderbird
     transmission_4-gtk
     seahorse
@@ -105,7 +106,10 @@
     xorg.libXext
   ];
 
-  environment.pathsToLink = ["/share/hunspell" "/share/myspell"];
+  environment.pathsToLink = [
+    "/share/hunspell"
+    "/share/myspell"
+  ];
   environment.variables.DICPATH = "/run/current-system/sw/share/hunspell";
 
   programs.chromium.enable = true; # this only enables chromium policies, not chromium itself
@@ -149,7 +153,11 @@
   };
 
   services.printing.enable = true;
-  services.printing.drivers = [pkgs.brgenml1lpr pkgs.brgenml1cupswrapper pkgs.hplip];
+  services.printing.drivers = [
+    pkgs.brgenml1lpr
+    pkgs.brgenml1cupswrapper
+    pkgs.hplip
+  ];
 
   # Enable sound.
   security.rtkit.enable = true;
@@ -218,6 +226,6 @@
   services.upower.enable = true;
 
   # open a port for rquickshare
-  networking.firewall.allowedTCPPorts = [31000];
-  networking.firewall.allowedUDPPorts = [31000];
+  networking.firewall.allowedTCPPorts = [ 31000 ];
+  networking.firewall.allowedUDPPorts = [ 31000 ];
 }

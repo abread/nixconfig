@@ -45,74 +45,88 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = inputs @ {
-    self,
-    nixpkgs,
-    ...
-  }: let
-    lib = nixpkgs.lib.extend (final: _prev:
-      import ./lib {
-        inherit inputs profiles multiPkgs nixosConfigurations;
-        lib = final;
+  outputs =
+    inputs@{
+      self,
+      nixpkgs,
+      ...
+    }:
+    let
+      lib = nixpkgs.lib.extend (
+        final: _prev:
+        import ./lib {
+          inherit
+            inputs
+            profiles
+            multiPkgs
+            nixosConfigurations
+            ;
+          lib = final;
+        }
+      );
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
+      forAllSystems = nixpkgs.lib.genAttrs systems;
+      ownPkgBuilder =
+        pkgs:
+        (lib.mapAttrsRecursive (_: path: (pkgs.callPackage path { inherit inputs; })) (
+          lib.rnl.rakeLeaves ./pkgs
+        ));
+      ownPkgsOverlay = _final: prev: ownPkgBuilder prev;
+      multiPkgs = forAllSystems (system: lib.rnl.mkPkgs system [ ownPkgsOverlay ]);
+      profiles = lib.rnl.mkProfiles ./profiles;
+      nixosConfigurations = lib.rnl.mkHosts ./hosts;
+    in
+    {
+      inherit nixosConfigurations;
+
+      overlays.default = ownPkgsOverlay;
+
+      packages = lib.recursiveUpdate (forAllSystems (
+        system: ownPkgBuilder inputs.nixpkgs.legacyPackages.${system}
+      )) (inputs.herdnix.genHerdnixHostsPackages nixosConfigurations);
+
+      apps = forAllSystems (system: {
+        herdnix = {
+          type = "app";
+          program = "${inputs.herdnix.packages.${system}.herdnix}/bin/herdnix";
+        };
       });
-    systems = ["x86_64-linux" "aarch64-linux"];
-    forAllSystems = nixpkgs.lib.genAttrs systems;
-    ownPkgBuilder = pkgs: (lib.mapAttrsRecursive
-      (_: path: (pkgs.callPackage path {inherit inputs;}))
-      (lib.rnl.rakeLeaves ./pkgs));
-    ownPkgsOverlay = _final: prev: ownPkgBuilder prev;
-    multiPkgs = forAllSystems (system: lib.rnl.mkPkgs system [ownPkgsOverlay]);
-    profiles = lib.rnl.mkProfiles ./profiles;
-    nixosConfigurations = lib.rnl.mkHosts ./hosts;
-  in {
-    inherit nixosConfigurations;
 
-    overlays.default = ownPkgsOverlay;
+      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt-rfc-style);
 
-    packages =
-      lib.recursiveUpdate
-      (forAllSystems (system: ownPkgBuilder inputs.nixpkgs.legacyPackages.${system}))
-      (inputs.herdnix.genHerdnixHostsPackages nixosConfigurations);
+      checks = forAllSystems (system: {
+        pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
+          src = ./.;
+          hooks = {
+            # Nix
+            nixfmt-rfc-style.enable = true;
+            deadnix.enable = true;
 
-    apps = forAllSystems (system: {
-      herdnix = {
-        type = "app";
-        program = "${inputs.herdnix.packages.${system}.herdnix}/bin/herdnix";
-      };
-    });
+            # Shell
+            shellcheck.enable = true;
+            shfmt.enable = true;
 
-    formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.alejandra);
+            # Git
+            check-merge-conflicts.enable = true;
+            forbid-new-submodules.enable = true;
 
-    checks = forAllSystems (system: {
-      pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
-        src = ./.;
-        hooks = {
-          # Nix
-          alejandra.enable = true;
-          deadnix.enable = true;
-
-          # Shell
-          shellcheck.enable = true;
-          shfmt.enable = true;
-
-          # Git
-          check-merge-conflicts.enable = true;
-          forbid-new-submodules.enable = true;
-
-          typos = {
-            enable = true;
-            settings.configPath = "./typos.toml";
+            typos = {
+              enable = true;
+              settings.configPath = "./typos.toml";
+            };
           };
         };
-      };
-    });
+      });
 
-    devShells = forAllSystems (system: {
-      default = nixpkgs.legacyPackages.${system}.mkShell {
-        inherit (self.checks.${system}.pre-commit-check) shellHook;
-        buildInputs = self.checks.${system}.pre-commit-check.enabledPackages;
-        packages = [inputs.herdnix.packages.${system}.herdnix];
-      };
-    });
-  };
+      devShells = forAllSystems (system: {
+        default = nixpkgs.legacyPackages.${system}.mkShell {
+          inherit (self.checks.${system}.pre-commit-check) shellHook;
+          buildInputs = self.checks.${system}.pre-commit-check.enabledPackages;
+          packages = [ inputs.herdnix.packages.${system}.herdnix ];
+        };
+      });
+    };
 }
