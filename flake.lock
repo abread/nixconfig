@@ -68,11 +68,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1733219105,
-        "narHash": "sha256-v+MouVL16ax1jVcHEKmZIhnQuPEXhqk+UTlIOCkKR0U=",
+        "lastModified": 1733247532,
+        "narHash": "sha256-A9d6laim7gVi8JfmgPuimtLlevOhaFr1fKNrQj6wwC4=",
         "owner": "wamserma",
         "repo": "flake-programs-sqlite",
-        "rev": "bd59fd2867a7bed4c0c3909ee1058545f32a5446",
+        "rev": "ed9809cfdce6406301ad6ae399876aa4fc261f9b",
         "type": "github"
       },
       "original": {
@@ -128,11 +128,11 @@
         "pre-commit-hooks": []
       },
       "locked": {
-        "lastModified": 1730733515,
-        "narHash": "sha256-PgHj6PUIBTJnCIfEUDx6T8nrrdrDoGSs8rSjU1CEsuA=",
+        "lastModified": 1733249881,
+        "narHash": "sha256-Le4g2Sn3AqadYQr013dmpTWIcIuFYuV3V56c7a+uoTA=",
         "owner": "abread",
         "repo": "herdnix",
-        "rev": "48842067a252ff5338c6a736f3c2610f4ec6fd3c",
+        "rev": "ee98ea8adc02a608ccc7283303e92030ebf00e45",
         "type": "github"
       },
       "original": {
@@ -143,11 +143,10 @@
     },
     "hidden": {
       "locked": {
+        "dirtyRev": "edb2788c2d1c1ba683893931bd100ce348063f81-dirty",
+        "dirtyShortRev": "edb2788-dirty",
         "lastModified": 1721778079,
-        "narHash": "sha256-Izx5p3hZXW7cPnYeDSUTYDn5XAV39zMtCEg0FYKJ6kA=",
-        "ref": "refs/heads/main",
-        "rev": "edb2788c2d1c1ba683893931bd100ce348063f81",
-        "revCount": 8,
+        "narHash": "sha256-GVRpW90MTh5Sdth7g53ixeliz3c4ykJEoHtEm8hp+gc=",
         "type": "git",
         "url": "file:///home/breda/Documents/nixconfig/hidden"
       },
