@@ -100,7 +100,7 @@ in {
 
     gcc
     clang_18
-    clang-tools
+    llvmPackages.clang-tools
 
     go
     delve

@@ -31,8 +31,8 @@
 
     (chromium.override {enableWideVine = true;})
     thunderbird
-    transmission-gtk
-    gnome.seahorse
+    transmission_4-gtk
+    seahorse
     libreoffice
     ultrastardx
     musescore
@@ -70,7 +70,7 @@
     xorg.xauth # X11Forwarding
     waypipe
     unstable.yt-dlp
-    ffmpeg_5-full
+    ffmpeg-full
     openldap
     powertop
     hunspell
@@ -84,7 +84,7 @@
 
     # required for themes
     gtk3
-    gnome3.adwaita-icon-theme
+    adwaita-icon-theme
 
     mpv
     alass # subtitle sync
@@ -152,8 +152,6 @@
   services.printing.drivers = [pkgs.brgenml1lpr pkgs.brgenml1cupswrapper pkgs.hplip];
 
   # Enable sound.
-  sound.enable = true;
-  hardware.pulseaudio.enable = lib.mkForce false;
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -187,18 +185,20 @@
     };
   };
 
-  hardware.opengl = {
+  hardware.graphics = {
     enable = true;
+    enable32Bit = true;
+
     extraPackages = with pkgs; [
       libvdpau
       vaapiVdpau
       libvdpau-va-gl
-      rocmPackages.clr
-      amdvlk
     ];
-
-    driSupport = true;
-    driSupport32Bit = true;
+    extraPackages32 = with pkgs.pkgsi686Linux; [
+      libvdpau
+      vaapiVdpau
+      libvdpau-va-gl
+    ];
   };
 
   services.auto-cpufreq.enable = true;

@@ -61,6 +61,14 @@
   hardware.cpu.amd.updateMicrocode = true;
   hardware.enableRedistributableFirmware = true;
 
+  hardware.amdgpu = {
+    opencl.enable = true;
+    amdvlk = {
+      enable = true;
+      support32Bit.enable = true;
+    };
+  };
+
   users.users.root.hashedPassword = inputs.hidden.userHashedPasswords.tightpants.root;
 
   # we have a smartcard reader!

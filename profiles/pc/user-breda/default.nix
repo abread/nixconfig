@@ -100,7 +100,6 @@
     };
   };
 
-  #environment.variables.GTK_USE_PORTAL = "1"; # try leaving it off
   environment.variables.GDK_BACKEND = "wayland";
   environment.variables.MOZ_ENABLE_WAYLAND = "1";
   systemd.user.services.xdg-desktop-portal.wantedBy = ["sway-session.target"];
