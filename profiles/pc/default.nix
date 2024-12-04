@@ -22,6 +22,13 @@
     ./user-breda
   ];
 
+  # use ssh with gssapi support
+  nixpkgs.overlays = [
+    (_final: prev: {
+      openssh = prev.openssh_gssapi;
+    })
+  ];
+
   environment.systemPackages = with pkgs; [
     imagemagick
     nix-output-monitor
@@ -66,7 +73,6 @@
     pinentry-gnome3
     file
     playerctl
-    openssh_gssapi
     sshuttle
     sshfs
     xorg.xauth # X11Forwarding
