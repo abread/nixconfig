@@ -56,7 +56,7 @@
       flameshot
       j4-dmenu-desktop
       vorbis-tools
-      polkit_gnome
+      soteria # polkit auth agent
       pulseaudio # pactl
       xdg-utils # xdg-open
       glib # gio
