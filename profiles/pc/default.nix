@@ -146,6 +146,14 @@
     SUBSYSTEM=="power_supply", ATTR{status}=="Discharging", ATTR{capacity}=="[16-20]", RUN+="${pkgs.systemd}/bin/systemctl suspend"
   '';
 
+  # Use a power-efficient scheduler
+  # scx_lavd implements "core-compaction", which concentrates tasks on a smaller number of cores under low-load situations.
+  boot.kernelPackages = pkgs.linuxKernel.packages.linux_6_12; # sched_ext needs kernel >=6.12
+  services.scx = {
+    enable = true;
+    scheduler = "scx_lavd";
+  };
+
   # Logitech Unifying
   hardware.logitech.wireless = {
     enable = true;
