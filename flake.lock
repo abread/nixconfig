@@ -143,10 +143,11 @@
     },
     "hidden": {
       "locked": {
-        "dirtyRev": "edb2788c2d1c1ba683893931bd100ce348063f81-dirty",
-        "dirtyShortRev": "edb2788-dirty",
-        "lastModified": 1721778079,
+        "lastModified": 1733323719,
         "narHash": "sha256-GVRpW90MTh5Sdth7g53ixeliz3c4ykJEoHtEm8hp+gc=",
+        "ref": "refs/heads/main",
+        "rev": "2e1b8941f80a37559ccdf6ea8f3ce841a2ae8df9",
+        "revCount": 9,
         "type": "git",
         "url": "file:///home/breda/Documents/nixconfig/hidden"
       },
