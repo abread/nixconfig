@@ -66,6 +66,7 @@
     pinentry-gnome3
     file
     playerctl
+    openssh_gssapi
     sshuttle
     sshfs
     xorg.xauth # X11Forwarding
