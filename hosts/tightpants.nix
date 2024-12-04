@@ -42,6 +42,7 @@
     options = [
       "defaults"
       "relatime"
+      "umask=0077" # prevent /boot/loader/random-seed from being read
     ];
   };
 
