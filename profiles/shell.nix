@@ -64,8 +64,6 @@
       # This entry exists in the original NIX_PATH but makes no sense in our machines,
       # as /etc/nixos/configuration.nix does not even exist.
       # "nixos-configuration=/etc/nixos/configuration.nix"
-
-      "/nix/var/nix/profiles/per-user/root/channels"
     ];
   };
 
