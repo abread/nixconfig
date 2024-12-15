@@ -137,6 +137,9 @@
     createSudoRules = false;
   };
 
+  # Improve desktop responsiveness when updating the system.
+  nix.daemonCPUSchedPolicy = "idle";
+
   boot.loader.efi.canTouchEfiVariables = true; # ?
 
   # enable automatic-timezoned, which needs time.timeZone to be unset
