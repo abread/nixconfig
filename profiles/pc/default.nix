@@ -19,7 +19,7 @@
     ./devtools.nix
     ./network.nix
     ./virt.nix
-    ./user-breda
+    ./user-breda.nix
   ];
 
   # use ssh with gssapi support
