@@ -8,6 +8,7 @@
     ./git.nix
     ./shell.nix
     ./sway
+    ./mpv.nix
   ];
 
   # Let Home Manager install and manage itself.

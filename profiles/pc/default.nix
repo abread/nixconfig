@@ -94,9 +94,6 @@
     gtk3
     adwaita-icon-theme
 
-    mpv
-    alass # subtitle sync
-
     restic
     rclone
 
