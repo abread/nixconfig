@@ -50,11 +50,26 @@
     '';
   };
 
+  services.resolved = {
+    enable = true;
+    fallbackDns = [
+      "2606:4700:4700::1111"
+      "1.0.0.1"
+      "2606:4700:4700::1001"
+      "1.1.1.1"
+    ];
+  };
+
   # Configure base network
   networking = {
     nftables.enable = lib.mkDefault true; # seems to be in use anyway
     firewall.enable = lib.mkDefault true;
     domain = lib.mkDefault "breda.pt";
+
+    # Configure DNS nameservers when not using NetworkManager
+    nameservers = lib.mkIf (
+      !config.networking.networkmanager.enable
+    ) config.services.resolved.fallbackDns;
   };
 
   # Configure NTP
@@ -113,22 +128,12 @@
   };
   networking.networkmanager.unmanaged = [ "interface-name:tailscale0" ];
 
-  services.resolved = {
-    enable = true;
-    fallbackDns = [
-      "2606:4700:4700::1111"
-      "1.0.0.1"
-      "2606:4700:4700::1001"
-      "1.1.1.1"
-    ];
-  };
-
   # Enable deployer everywhere
   modules.herdnix.enable = true;
 
   # Set deployment keys when using the automatic user
-  users.users."${config.modules.herdnix.deploymentUser
-  }".openssh.authorizedKeys.keys = lib.mkIf config.modules.herdnix.createDeploymentUser inputs.hidden.deployAuthorizedKeys;
+  users.users."${config.modules.herdnix.deploymentUser}".openssh.authorizedKeys.keys =
+    lib.mkIf config.modules.herdnix.createDeploymentUser inputs.hidden.deployAuthorizedKeys;
 
   # Disable manual user management
   users.mutableUsers = lib.mkDefault false;
