@@ -224,9 +224,8 @@
     ];
   };
 
-  services.auto-cpufreq.enable = true;
-  services.thermald.enable = true;
-  powerManagement.powertop.enable = true;
+  services.power-profiles-daemon.enable = true;
+  #powerManagement.powertop.enable = true;
 
   boot.supportedFilesystems.ntfs = true;
 
