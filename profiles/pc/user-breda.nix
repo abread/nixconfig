@@ -53,7 +53,7 @@
       grim
       slurp
       swappy
-      flameshot
+      (flameshot.override { enableWlrSupport = true; })
       j4-dmenu-desktop
       vorbis-tools
       soteria # polkit auth agent
