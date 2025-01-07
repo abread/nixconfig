@@ -50,11 +50,26 @@
     '';
   };
 
+  services.resolved = {
+    enable = true;
+    fallbackDns = [
+      "2606:4700:4700::1111"
+      "1.0.0.1"
+      "2606:4700:4700::1001"
+      "1.1.1.1"
+    ];
+  };
+
   # Configure base network
   networking = {
     nftables.enable = lib.mkDefault true; # seems to be in use anyway
     firewall.enable = lib.mkDefault true;
     domain = lib.mkDefault "breda.pt";
+
+    # Configure DNS nameservers when not using NetworkManager
+    nameservers = lib.mkIf (
+      !config.networking.networkmanager.enable
+    ) config.services.resolved.fallbackDns;
   };
 
   # Configure NTP
@@ -112,16 +127,6 @@
     useRoutingFeatures = "client";
   };
   networking.networkmanager.unmanaged = [ "interface-name:tailscale0" ];
-
-  services.resolved = {
-    enable = true;
-    fallbackDns = [
-      "2606:4700:4700::1111"
-      "1.0.0.1"
-      "2606:4700:4700::1001"
-      "1.1.1.1"
-    ];
-  };
 
   # Enable deployer everywhere
   modules.herdnix.enable = true;
