@@ -30,7 +30,7 @@ in
       # TODO: email (?)
 
       APP_KEY_FILE = "${config.services.firefly-iii-data-importer.dataDir}/app_key.env";
-      FIREFLY_III_ACCESS_TOKEN_FILE = "${config.services.firefly-iii-data-importer.dataDir}/nordigen_key.env";
+      FIREFLY_III_ACCESS_TOKEN_FILE = "${config.services.firefly-iii-data-importer.dataDir}/firefly_iii_access_token.env";
       NORDIGEN_ID_FILE = "${config.services.firefly-iii-data-importer.dataDir}/nordigen_id.env";
       NORDIGEN_KEY_FILE = "${config.services.firefly-iii-data-importer.dataDir}/nordigen_key.env";
     };
