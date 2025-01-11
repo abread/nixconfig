@@ -1,5 +1,7 @@
 {
   config,
+  lib,
+  pkgs,
   profiles,
   ...
 }:
@@ -53,6 +55,50 @@ in
       "nginx.service"
     ];
   };
+
+  systemd.services."phpfpm-firefly-iii-data-importer".serviceConfig =
+    let
+      envFileLocation = "/run/phpfpm-firefly-iii-data-importer.env";
+      env-file-values =
+        lib.attrsets.mapAttrs' (n: v: lib.attrsets.nameValuePair (lib.strings.removeSuffix "_FILE" n) v)
+          (
+            lib.attrsets.filterAttrs (
+              n: _v: lib.strings.hasSuffix "_FILE" n
+            ) config.services.firefly-iii-data-importer.settings
+          );
+    in
+    {
+      EnvironmentFile = "-${envFileLocation}";
+      ExecStartPre = pkgs.writeShellScript "data-importer-gen-env.sh" ''
+        rm '${envFileLocation}'
+        umask 377
+        ${lib.strings.concatLines (
+          lib.attrsets.mapAttrsToList (
+            n: v: "echo \"${n}='$(< '${v}')'\" >> '${envFileLocation}'"
+          ) env-file-values
+        )}
+      '';
+    };
+  services.phpfpm.pools."firefly-iii-data-importer".phpEnv =
+    let
+      env-file-values =
+        lib.attrsets.mapAttrs'
+          (
+            n: _v:
+            lib.attrsets.nameValuePair (lib.strings.removeSuffix "_FILE" n) (
+              "$" + (lib.strings.removeSuffix "_FILE" n)
+            )
+          )
+          (
+            lib.attrsets.filterAttrs (
+              n: _v: lib.strings.hasSuffix "_FILE" n
+            ) config.services.firefly-iii-data-importer.settings
+          );
+      env-nonfile-values = lib.attrsets.filterAttrs (
+        n: _v: !lib.strings.hasSuffix "_FILE" n
+      ) config.services.firefly-iii-data-importer.settings;
+    in
+    env-file-values // env-nonfile-values;
 
   systemd.services."firefly-iii-data-importer-autoimport" = {
     description = "Firefly III Data Importer Auto Import";
